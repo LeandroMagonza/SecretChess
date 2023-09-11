@@ -75,8 +75,8 @@ public class BoardManager : MonoBehaviour {
                 currentTile.GetComponent<Tile>().originalColor = currentTile.GetComponent<Image>().color;
                 board[row, column] = currentTile.GetComponent<Tile>();
 
-                if (row == 0 || row == 1) {
-                    Piece piece;
+                Piece piece = null;
+                if (row == 0 || row == 7) {
                     switch (column) {
                         case 0:
                             piece = PieceLibrary.Rook();
@@ -106,66 +106,21 @@ public class BoardManager : MonoBehaviour {
                             piece = PieceLibrary.Pawn();
                             break;
                     }
-
-                    // if (row == 1) {
-                    //     piece = PieceLibrary.Pawn();
-                    // }
-
-                    if (piece is not null) {
-                        piece.SetOwner(0, PlayerController.Instance.players[0]);
-                        currentTile.GetComponent<Tile>().SetPiece(piece);
-                        PlayerController.Instance.players[0].AddPiece(piece);
-                    }
-                    else {
-                        Debug.Log("Null piece?");
-                    }
                 }
-
-                if (row == 6 || row == 7) {
-                    Piece piece;
-                    switch (column) {
-                        // case 0:	
-                        //     piece = PieceLibrary.Rook();
-                        //     break;
-                        // case 1:	
-                        //     piece = PieceLibrary.Knight();
-                        //     break;
-                        // case 2:	
-                        //     piece = PieceLibrary.Bishop();
-                        //     break;
-                        // case 3:	
-                        //     piece = PieceLibrary.King();
-                        //     break;
-                        // case 4:	
-                        //     piece = PieceLibrary.Queen();
-                        //     break;
-                        // case 5:	
-                        //     piece = PieceLibrary.Bishop();
-                        //     break;
-                        // case 6:	
-                        //     piece = PieceLibrary.Knight();
-                        //     break;
-                        // case 7:	
-                        //     piece = PieceLibrary.Rook();
-                        //     break;
-                        default:
-                            piece = PieceLibrary.Pawn();
-                            break;
-                    }
-
-                    // if (row == 1) {
-                    //     piece = PieceLibrary.Pawn();
-                    // }
-
-                    if (piece is not null) {
+                if (row == 1 || row == 6) {
+                    piece = PieceLibrary.Pawn();
+                }
+                if (piece is not null) {
+                    if (row == 0|| row == 1) {
+                        piece.SetOwner(0, PlayerController.Instance.players[0]);
+                        PlayerController.Instance.players[0].AddPiece(piece);
+                    }else if (row == 6 || row == 7) {
                         piece.SetOwner(1, PlayerController.Instance.players[1]);
-                        currentTile.GetComponent<Tile>().SetPiece(piece);
                         PlayerController.Instance.players[1].AddPiece(piece);
                     }
-                    else {
-                        Debug.Log("Null piece?");
-                    }
+                    currentTile.GetComponent<Tile>().SetPiece(piece);
                 }
+
             }
         }
 

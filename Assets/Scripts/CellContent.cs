@@ -1,6 +1,5 @@
 public enum CellContent {
     //condition
-
     Empty, 
     Occupied, 
     Enemy, 
@@ -8,5 +7,7 @@ public enum CellContent {
     //movement
     Move,
     Capture,
-    MoveAndCapture 
+    MoveAndCapture,
+    MoveAndCaptureAny,
+    CaptureAny
 };

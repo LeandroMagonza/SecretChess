@@ -21,13 +21,18 @@ public class Movement {
     public void MarkPossibleMovements(Tile tileStart, bool invert) {
         //Debug.Log("Called markpossible movements on tile " + tileStart.tileNumber);
         bool markTilesForMovement = true;
+        bool markNextLayer = true;
+        
         foreach (var stepMovements in movementStencil) {
-            if (!markTilesForMovement) {
+            if (!markTilesForMovement || !markNextLayer) {
                 return;
             }
 
             List<Tile> tilesToMark = new List<Tile>();
             foreach (var content in stepMovements) {
+                if (!markTilesForMovement) {
+                    return;
+                }
                 (int row, int column) offset = content.Key;
                 CellCondition cellCondition = content.Value;
                 
@@ -45,12 +50,10 @@ public class Movement {
                 //if (tileToCheck.piece.GetOwner() == tileStart.piece.GetOwner()) {break;}
                 switch (cellCondition.cellContent) {
                     //conditional types
-
                     case CellContent.Empty:
                         if (tileToCheck is null || tileToCheck.piece is not null) {
                             markTilesForMovement = false;
                         }
-
                         break;
                     case CellContent.Occupied:
                         if (tileToCheck is null || tileToCheck.piece is null) {
@@ -73,7 +76,20 @@ public class Movement {
                             (tileToCheck.piece is null || tileToCheck.piece.GetOwner() != tileStart.piece.GetOwner())
                             ) {
                             tilesToMark.Add(tileToCheck);
-                            
+                            if (cellCondition.endOnCapture && tileToCheck.piece is not null) {
+                                markNextLayer = false;
+                            }
+                            }
+                        else if (cellCondition.obligatory) { markTilesForMovement = false; }
+                        break;                    
+                    case CellContent.MoveAndCaptureAny:
+                        if (tileToCheck is not null &&
+                            (tileToCheck.piece is null)
+                            ) {
+                            tilesToMark.Add(tileToCheck);
+                            if (cellCondition.endOnCapture && tileToCheck.piece is not null) {
+                                markNextLayer = false;
+                            }
                         }
                         else if (cellCondition.obligatory) { markTilesForMovement = false; }
                         break;
@@ -81,6 +97,19 @@ public class Movement {
                         if (tileToCheck is not null &&
                             tileToCheck.piece is not null && tileToCheck.piece.GetOwner() != tileStart.piece.GetOwner()) {
                             tilesToMark.Add(tileToCheck);
+                            if (cellCondition.endOnCapture) {
+                                markNextLayer = false;
+                            }
+                        }
+                        else if (cellCondition.obligatory) { markTilesForMovement = false; }
+                        break;                    
+                    case CellContent.CaptureAny:
+                        if (tileToCheck is not null &&
+                            tileToCheck.piece is not null) {
+                            tilesToMark.Add(tileToCheck);
+                            if (cellCondition.endOnCapture) {
+                                markNextLayer = false;
+                            }
                         }
                         else if (cellCondition.obligatory) { markTilesForMovement = false; }
                         break;

@@ -8,11 +8,16 @@ public class CellCondition
     //public CellContent preConditionCellContent;
     // public CellContent endCellContent;
     public bool obligatory;
+    public bool endOnCapture;
 
-    public CellCondition(CellContent cellContent, bool obligatory = false)
+    public CellCondition(CellContent cellContent, 
+        bool obligatory = false,
+        bool endOnCapture = false
+        )
     {
         this.cellContent = cellContent;
         this.obligatory = obligatory;
+        this.endOnCapture = endOnCapture;
     }
     
 }

@@ -46,21 +46,41 @@ public static class PieceLibrary
         // newMovement.AddStep(layer,(0,0),new CellCondition(CellContent.Start, true, MovementSymmetry.None));
         
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(1,0),new CellCondition(CellContent.MoveAndCapture,true));
+        newMovement.AddStep(layer,(1,0),new CellCondition(CellContent.MoveAndCapture,true,true));
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(2,0),new CellCondition(CellContent.MoveAndCapture,true));        
+        newMovement.AddStep(layer,(2,0),new CellCondition(CellContent.MoveAndCapture,true,true));        
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(3,0),new CellCondition(CellContent.MoveAndCapture,true));
+        newMovement.AddStep(layer,(3,0),new CellCondition(CellContent.MoveAndCapture,true,true));
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(4,0),new CellCondition(CellContent.MoveAndCapture,true));
+        newMovement.AddStep(layer,(4,0),new CellCondition(CellContent.MoveAndCapture,true,true));
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(5,0),new CellCondition(CellContent.MoveAndCapture,true));        
+        newMovement.AddStep(layer,(5,0),new CellCondition(CellContent.MoveAndCapture,true,true));        
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(6,0),new CellCondition(CellContent.MoveAndCapture,true));
+        newMovement.AddStep(layer,(6,0),new CellCondition(CellContent.MoveAndCapture,true,true));
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(7,0),new CellCondition(CellContent.MoveAndCapture,true));        
+        newMovement.AddStep(layer,(7,0),new CellCondition(CellContent.MoveAndCapture,true,true));        
         layer = newMovement.AddLayer();
-        newMovement.AddStep(layer,(8,0),new CellCondition(CellContent.MoveAndCapture,true));
+        newMovement.AddStep(layer,(8,0),new CellCondition(CellContent.MoveAndCapture,true,true));
+        
+        piece.movementPattern.AddMovement(newMovement,MovementSymmetry.Horizontal);
+        
+        newMovement = new Movement();
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,1),new CellCondition(CellContent.MoveAndCapture,true,true));
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,2),new CellCondition(CellContent.MoveAndCapture,true,true));        
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,3),new CellCondition(CellContent.MoveAndCapture,true,true));
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,4),new CellCondition(CellContent.MoveAndCapture,true,true));
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,5),new CellCondition(CellContent.MoveAndCapture,true,true));        
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,6),new CellCondition(CellContent.MoveAndCapture,true,true));
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,7),new CellCondition(CellContent.MoveAndCapture,true,true));        
+        layer = newMovement.AddLayer();
+        newMovement.AddStep(layer,(0,8),new CellCondition(CellContent.MoveAndCapture,true,true));
         
         piece.movementPattern.AddMovement(newMovement,MovementSymmetry.Vertical);
 
