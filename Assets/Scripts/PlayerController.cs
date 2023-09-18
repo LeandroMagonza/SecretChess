@@ -2,14 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     // Start is called before the first frame update
     //public Piece selectedPiece;
     public List<PlayerData> players = new List<PlayerData>();
-   
+    public PlayerAvatar[] playerAvatars;
     public int currentPlayer = 1;
     private static PlayerController instance;
     public static PlayerController Instance
@@ -28,8 +27,17 @@ public class PlayerController : MonoBehaviour
     {
         if (instance == null) {
             instance = this as PlayerController;
-            players.Add(new PlayerData(PlayerType.LOCAL_PLAYER).SetPieceColor(Color.red));
-            players.Add(new PlayerData(PlayerType.IA).SetPieceColor(Color.blue));
+            players.Add(
+                new PlayerData(PlayerType.LOCAL_PLAYER,0,0)
+                    .SetPieceColor(Color.red)
+                    .SetPlayerAvatar(playerAvatars[0])
+                );
+            players.Add(
+                new PlayerData(PlayerType.IA,1,1)
+                    .SetPieceColor(Color.blue)
+                    .SetPlayerAvatar(playerAvatars[1])
+                );
+            players[currentPlayer].DisplayTurn(true);
         }
         else if (instance != this)
             DestroySelf();
@@ -45,18 +53,25 @@ public class PlayerController : MonoBehaviour
     public void SelectTile(Tile tile)
     {
         //Debug.Log(Instance.currentPlayer + " tried to select a piece owned by"+tile.piece?.GetOwner());
-        if (1-BoardManager.Instance.turnNumber%2 == currentPlayer && tile.piece && tile.piece.GetOwner() == Instance.currentPlayer)
+        if (1-BoardManager.Instance.turnNumber%2 == currentPlayer && tile.piece && tile.piece.GetOwnerID() == Instance.currentPlayer)
         {
             //selectedPiece = tile.piece;
+            //BoardManager.Instance
             BoardManager.Instance.SetSelectedTile(tile);
         }
 
     }
 
 
-    public void ExecuteMove(Tile tile) {
-        BoardManager.Instance.ExecuteMove(tile);
+    public IEnumerator ProcessMove(Tile tile) {
+        foreach (var playerData in players) {
+            playerData.DisplayTurn(false);
+        }
+        yield return StartCoroutine(BoardManager.Instance.ProcessMove(tile));
         currentPlayer = 1 - currentPlayer;
+        //a cada avatar de jugador le pasa el id del jugador actual,si coincide con el propio hace una animacion 
+        players[currentPlayer].DisplayTurn(true);
+
         if (currentPlayer == 1 && players[1].playerType == PlayerType.IA) {
             StartCoroutine(ChooseMove());
         }
@@ -75,22 +90,46 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Reseted player "+playerID);
             players[playerID].king = null;
-            foreach (Piece piece in players[playerID].piecesOwnedByPlayer.ToArray()) {
-               //Destroy(piece.gameObject);
-            }
             players[playerID].piecesOwnedByPlayer = new List<Piece>();
+            players[playerID].SetInitiative(playerID);
         }
     }
 }
 
 public class PlayerData {
+    public int playerID;
     public PlayerType playerType;
     public Piece king;
     public List<Piece> piecesOwnedByPlayer = new List<Piece>();
     public Color pieceColor;
+    public PlayerAvatar playerAvatar;
+    public int initiative { get; private set; }
 
-    public PlayerData(PlayerType playerType) {
+    public PlayerData(PlayerType playerType, int playerID, int initiative) {
         this.playerType = playerType;
+        this.playerID = playerID;
+        SetInitiative(initiative);
+    }
+
+    public void SetInitiative(int initiative) {
+        Debug.Log("seteada iniciativa "+ initiative);
+        this.initiative = initiative;
+    }
+
+    public PlayerData SetPlayerAvatar(PlayerAvatar playerAvatar) {
+        this.playerAvatar = playerAvatar;
+        playerAvatar.owner = playerID;
+        playerAvatar.DisplayInitiative(initiative);
+        Debug.Log(playerAvatar.gameObject.name+" setting owner to: "+playerAvatar.owner);
+        playerAvatar.SetOriginalColor(pieceColor);
+        return this;
+    }
+
+    public void DisplayTurn(bool active) {
+        playerAvatar.DisplayTurn(active);
+    }
+    public void DisplayInitiative(int initiative) {
+        playerAvatar.DisplayInitiative(initiative);
     }
 
     public void SetKing(Piece appointedKing) {

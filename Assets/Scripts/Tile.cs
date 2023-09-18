@@ -36,7 +36,7 @@ public class Tile : MonoBehaviour
     public void OnClick()
     {
         if (possibleMoveMarker.activeInHierarchy) {
-            PlayerController.Instance.ExecuteMove(this);
+            StartCoroutine(PlayerController.Instance.ProcessMove(this));
         }
         else {
             PlayerController.Instance.SelectTile(this);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -12,7 +13,10 @@ public class BoardManager : MonoBehaviour {
     // Start is called before the first frame update
     public GameObject rowPrefab;
     public GameObject tilePrefab;
+    public GameMode gamemode = GameMode.TurnBased;
 
+    public SortedDictionary<int,(Piece movingPiece, Tile endingTile)> moveQueue = new SortedDictionary<int, (Piece movingPiece, Tile endingTile)>();
+    public SortedDictionary<int,(Piece movingPiece, Tile endingTile)> kingMoveQueue = new SortedDictionary<int, (Piece movingPiece, Tile endingTile)>();
     public delegate void TileSelected(bool selected);
 
     public static event TileSelected OnTileSelected;
@@ -23,6 +27,7 @@ public class BoardManager : MonoBehaviour {
     public TextMeshProUGUI matchEndText;
 
     public int turnNumber = 1;
+    private bool processingMoves = false;
 
     public static BoardManager Instance {
         get {
@@ -81,24 +86,30 @@ public class BoardManager : MonoBehaviour {
                         case 0:
                             piece = PieceLibrary.Rook();
                             break;
-                        // case 1:	
-                        //     piece = PieceLibrary.Knight();
-                        //     break;
-                        // case 2:	
-                        //     piece = PieceLibrary.Bishop();
-                        //     break;
-                        // case 3:	
-                        //     piece = PieceLibrary.King();
-                        //     break;
-                        // case 4:	
-                        //     piece = PieceLibrary.Queen();
-                        //     break;
-                        // case 5:	
-                        //     piece = PieceLibrary.Bishop();
-                        //     break;
-                        // case 6:	
-                        //     piece = PieceLibrary.Knight();
-                        //     break;
+                        case 1:	
+                            piece = PieceLibrary.Knight();
+                            break;
+                        case 2:	
+                            piece = PieceLibrary.Bishop();
+                            break;
+                        case 3:
+                            piece = PieceLibrary.King();
+                            if (row == 0) {
+                                PlayerController.Instance.players[0].SetKing(piece);
+                            }
+                            else if(row == 7) {
+                                PlayerController.Instance.players[1].SetKing(piece);
+                            }
+                            break;
+                        case 4:	
+                            piece = PieceLibrary.Queen();
+                            break;
+                        case 5:	
+                            piece = PieceLibrary.Bishop();
+                            break;
+                        case 6:	
+                            piece = PieceLibrary.Knight();
+                            break;
                         case 7:
                             piece = PieceLibrary.Rook();
                             break;
@@ -146,6 +157,7 @@ public class BoardManager : MonoBehaviour {
                     .piecesOwnedByPlayer[randomPieceCrownedKing]
             );
         }
+        
     }
 
     private void ShowPossibleMoves(Tile tile) {
@@ -155,8 +167,12 @@ public class BoardManager : MonoBehaviour {
     private void UpdateBoard() { }
 
     public void SetSelectedTile(Tile selectedTile) {
-        currentlySelectedTile = selectedTile;
         OnTileSelected?.Invoke(false);
+        if(processingMoves){return;}
+        if (currentlySelectedTile == selectedTile) {
+            selectedTile = null;
+        } 
+        currentlySelectedTile = selectedTile;
         if (selectedTile is not null) {
             board[selectedTile.tileNumber.Item1, selectedTile.tileNumber.Item2].MarkAsSelected(true);
             ShowPossibleMoves(selectedTile);
@@ -175,12 +191,91 @@ public class BoardManager : MonoBehaviour {
         return board[row, column];
     }
 
-    public void ExecuteMove(Tile endingTile) {
-        Piece movingPiece = currentlySelectedTile.piece;
-        currentlySelectedTile.SetPiece(null);
+    public IEnumerator ProcessMove(Tile endingTile) {
+        turnNumber++;
+        Tile selectedTile = currentlySelectedTile;
+        PlayerData actingPlayer = PlayerController.Instance.players[selectedTile.piece.GetOwnerID()];
+        // para que deje de mostrarse los posibles movimientos en el tablero, y el tile como seleccionado
+        SetSelectedTile(null);
+        switch (gamemode) {
+            case GameMode.TurnBased:
+                ExecuteMove(selectedTile.piece,endingTile);
+                break;
+            case GameMode.Simultaneous:
+                int playerInitiative = actingPlayer.initiative;
+                if (actingPlayer.king == selectedTile.piece && !kingMoveQueue.ContainsKey(playerInitiative)) {
+                    //Debug.Log("agrego moviento iniciativa KING"+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+endingTile.tileNumber);   
+                    kingMoveQueue.Add(playerInitiative,
+                        (selectedTile.piece, endingTile));
+                }
+                else if (!moveQueue.ContainsKey(playerInitiative)) { 
+                    //Debug.Log("agrego moviento iniciativa "+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+endingTile.tileNumber);   
+                    moveQueue.Add(playerInitiative,
+                        (selectedTile.piece, endingTile));
+                }
+                else {
+                    throw new Exception("Tried to add a move to the queue with an alredy added initiative");
+                }
+                //Debug.Log("1.empiezo corutina");
+                actingPlayer.SetInitiative(actingPlayer.initiative + PlayerController.Instance.players.Count);
+                yield return StartCoroutine(CheckMoveQueue());
+                //Debug.Log("2.termino corutina");
+                break;
+            default:
+                //Debug.Log("No gamemode has been set");
+                break;
+        }
+        // el jugador con la iniciativa con valor mas bajo actua antes, se le suma 1 a este despues de sumar una jugada
+        // para que en el proximo movimiento tenga prioridad el otro
+        
+        
+    }
+
+    private IEnumerator CheckMoveQueue() {
+        if ( (moveQueue.Count + kingMoveQueue.Count) < 2) {
+            yield return null;
+        }
+        else {
+            //Debug.Log(moveQueue.Count +"mc / kc"+kingMoveQueue.Count);
+            processingMoves = true;
+            // foreach (var VARIABLE in moveQueue) {
+            //     Debug.Log("iniciativa "+VARIABLE.Key +" "+VARIABLE.Value.movingPiece.name+" "+VARIABLE.Value.endingTile.tileNumber);
+            // }
+            List<SortedDictionary<int, (Piece movingPiece, Tile endingTile)>> queues =
+                new List<SortedDictionary<int, (Piece movingPiece, Tile endingTile)>>()
+                    {kingMoveQueue,moveQueue };
+            foreach (var queue in queues) {
+                foreach (var move in queue) {
+                    yield return new WaitForSeconds(.5f);
+                    ExecuteMove(move.Value.movingPiece,move.Value.endingTile);    
+                }
+            }
+            // al jugador con mas iniciativa se le asigna la iniciativa mas baja (0) para que la proxima ronda vaya primero
+            List<PlayerData> sortedPlayerList = PlayerController.Instance.players.OrderByDescending(pD=>pD.initiative).ToList();
+            //Debug.Log("cant de jugadores ordenados "+sortedPlayerList.Count);
+            for (int playerOrder = 0; playerOrder < sortedPlayerList.Count; playerOrder++) {
+                //Debug.Log("seteando iniciativa de jugador "+sortedPlayerList[playerOrder].playerID+" iniciativa "+playerOrder);
+                sortedPlayerList[playerOrder].SetInitiative(playerOrder);
+                sortedPlayerList[playerOrder].DisplayInitiative(playerOrder);
+            }
+            moveQueue.Clear();
+            kingMoveQueue.Clear();
+            processingMoves = false;
+            
+            
+        }
+        Debug.Log("Exiting checkmovequeue");
+    }
+
+    public void ExecuteMove(Piece movingPiece, Tile endingTile) {
+        //chequea si la pieza fue comida antes de su turno
+        //if (movingPiece is null) return;
+        if (movingPiece == null) return;
+
+        FindTileOccupiedByPieceInBoard(movingPiece)?.SetPiece(null);
 
         Piece capturedPiece = endingTile.piece;
-
+        movingPiece.amountOfMoves++;
         endingTile.SetPiece(movingPiece);
 
         if (capturedPiece) {
@@ -197,10 +292,6 @@ public class BoardManager : MonoBehaviour {
 
             Destroy(capturedPiece.gameObject);
         }
-
-        SetSelectedTile(null);
-        turnNumber++;
-        //UpdateBoard();
     }
 
     private IEnumerator RestartMatch() {
@@ -214,7 +305,24 @@ public class BoardManager : MonoBehaviour {
         Debug.Log("About to reset players " + PlayerController.Instance.players.Count);
         PlayerController.Instance.ResetPlayer(0);
         PlayerController.Instance.ResetPlayer(1);
+        PlayerController.Instance.currentPlayer = 0;
         matchEndText.gameObject.SetActive(false);
+        turnNumber = 1; 
         Start();
     }
+
+    public Tile FindTileOccupiedByPieceInBoard(Piece pieceToFind) {
+        foreach (Tile tile in board) {
+            if (tile.piece == pieceToFind) return tile;
+        }
+
+        return null;
+    }
+}
+
+public enum Phase {
+    Dawn,Dusk,Night
+}
+public enum GameMode {
+    TurnBased,Simultaneous
 }

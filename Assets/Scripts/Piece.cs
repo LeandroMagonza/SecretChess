@@ -9,10 +9,16 @@ public class Piece : MonoBehaviour
     // private int? tileNumber = null;
     public MovementPattern movementPattern;
     public GameObject kingMarker;
+    public int amountOfMoves = 0;
+    public int amountOfCaptures = 0;
+    public int currentLevel = 0;
+    public int maxLives = 1;
+    public int amountOfLivesLeft = 1;
+    public int value = 3;
+    //public int priority = 0;
     [SerializeField]
     int owner;
 
-    private int amountOfMoves;
  
     void Start()
     {
@@ -24,10 +30,10 @@ public class Piece : MonoBehaviour
         this.owner = ownerID;
         GetComponent<Image>().color = ownerData.pieceColor;
     }
-    public void SetMovementPatter(MovementPattern movementPattern) {
+    public void SetMovementPattern(MovementPattern movementPattern) {
         this.movementPattern = movementPattern;
     }
-    public int GetOwner()
+    public int GetOwnerID()
     {
         return this.owner;
     }
