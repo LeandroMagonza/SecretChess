@@ -204,17 +204,17 @@ public class BoardManager : MonoBehaviour {
             case GameMode.Simultaneous:
                 int playerInitiative = actingPlayer.initiative;
                 if (actingPlayer.king == selectedTile.piece && !kingMoveQueue.ContainsKey(playerInitiative)) {
-                    //Debug.Log("agrego moviento iniciativa KING"+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+endingTile.tileNumber);   
+                    //Debug.Log("agrego moviento iniciativa KING"+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+tileEnd.tileNumber);   
                     kingMoveQueue.Add(playerInitiative,
                         (selectedTile.piece, endingTile));
                 }
                 else if (!moveQueue.ContainsKey(playerInitiative)) { 
-                    //Debug.Log("agrego moviento iniciativa "+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+endingTile.tileNumber);   
+                    //Debug.Log("agrego moviento iniciativa "+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+tileEnd.tileNumber);   
                     moveQueue.Add(playerInitiative,
                         (selectedTile.piece, endingTile));
                 }
                 else {
-                    throw new Exception("Tried to add a move to the queue with an alredy added initiative");
+                    throw new Exception("Tried to add a move to the queue with an already added initiative");
                 }
                 //Debug.Log("1.empiezo corutina");
                 actingPlayer.SetInitiative(actingPlayer.initiative + PlayerController.Instance.players.Count);
@@ -239,7 +239,7 @@ public class BoardManager : MonoBehaviour {
             //Debug.Log(moveQueue.Count +"mc / kc"+kingMoveQueue.Count);
             processingMoves = true;
             // foreach (var VARIABLE in moveQueue) {
-            //     Debug.Log("iniciativa "+VARIABLE.Key +" "+VARIABLE.Value.movingPiece.name+" "+VARIABLE.Value.endingTile.tileNumber);
+            //     Debug.Log("iniciativa "+VARIABLE.Key +" "+VARIABLE.Value.movingPiece.name+" "+VARIABLE.Value.tileEnd.tileNumber);
             // }
             List<SortedDictionary<int, (Piece movingPiece, Tile endingTile)>> queues =
                 new List<SortedDictionary<int, (Piece movingPiece, Tile endingTile)>>()
@@ -267,16 +267,38 @@ public class BoardManager : MonoBehaviour {
         Debug.Log("Exiting checkmovequeue");
     }
 
-    public void ExecuteMove(Piece movingPiece, Tile endingTile) {
+    public void ExecuteMove(Piece movingPiece, Tile tileEnd) {
         //chequea si la pieza fue comida antes de su turno
         //if (movingPiece is null) return;
         if (movingPiece == null) return;
+        
+        //hay que recorrer en los movimientos del marking movement, y vamos seteando ending tile hasta encontrar un tile que permita captura pero corte movimiento despues 
+        //tileEnd.markingMovement
+        Tile tileStart = FindTileOccupiedByPieceInBoard(movingPiece);
+        foreach (var stepMovements in tileEnd.markingMovement.movementStencil){
+                //startingTile.tileNumber.row
+                //startingTile.tileNumber.column
+                    /*stepMovements.ContainsKey((
+                        startingTile.tileNumber.row - tileEnd.tileNumber.row,
+                        startingTile.tileNumber.column - tileEnd.tileNumber.column
+                        ))*/
+                    foreach (var content in stepMovements)
+                    {
+                        (int row, int column) offset = content.Key;
+                        CellCondition cellCondition = content.Value;
+                        
+                        Tile tileToCheck = BoardManager.Instance.GetTile(
+                            tileStart.tileNumber.row + offset.row * (movingPiece.InvertMovement() ? -1 : 1),
+                            tileStart.tileNumber.column + offset.column * (movingPiece.InvertMovement() ? -1 : 1)
+                        );
+                    }
 
-        FindTileOccupiedByPieceInBoard(movingPiece)?.SetPiece(null);
-
-        Piece capturedPiece = endingTile.piece;
+        }
+        tileStart?.SetPiece(null);
+        
+        Piece capturedPiece = tileEnd.piece;
         movingPiece.amountOfMoves++;
-        endingTile.SetPiece(movingPiece);
+        tileEnd.SetPiece(movingPiece);
 
         if (capturedPiece) {
             if (capturedPiece == PlayerController.Instance.players[0].king) {

@@ -46,8 +46,10 @@ public class Movement {
                 return;
             }
 
-            List<Tile> tilesToMark = new List<Tile>();
-            foreach (var content in stepMovements) {
+            List< (Tile tile,Movement movement)> tilesToMark = new List<(Tile, Movement)>();
+            foreach (var content in stepMovements)
+            {
+                bool addTileToMark = false;
                 if (!markTilesForMovement) {
                     return;
                 }
@@ -67,110 +69,142 @@ public class Movement {
                 //si la casilla que marca el movimiento esta ocupada por una pieza del mismo equipo
                 //En simulchess podes comerte tus propias piezas
                 //if (tileToCheck.piece.GetOwner() == tileStart.piece.GetOwner()) {break;}
-                switch (cellCondition.cellContent) {
-                    //conditional types
-                    case CellContent.Empty:
-                        if (tileToCheck is null || tileToCheck.piece is not null) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.Occupied:
-                        if (tileToCheck is null || tileToCheck.piece is null) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.Enemy:
-                        if (tileToCheck is null || tileToCheck.piece is null ||
-                            tileToCheck.piece.GetOwnerID() == tileStart.piece.GetOwnerID()) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.Ally:
-                        if (tileToCheck is null || tileToCheck.piece is null ||
-                            tileToCheck.piece.GetOwnerID() != tileStart.piece.GetOwnerID()) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    //movement types
-                    case CellContent.MoveAndCapture:
-                        if (tileToCheck is not null &&
-                            (tileToCheck.piece is null || tileToCheck.piece.GetOwnerID() != tileStart.piece.GetOwnerID())
-                           ) {
-                            tilesToMark.Add(tileToCheck);
-                            if (cellCondition.endOnCapture && tileToCheck.piece is not null) {
-                                markNextLayer = false;
-                            }
-                        }
-                        else if (cellCondition.obligatory) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.MoveAndCaptureAny:
-                        if (tileToCheck is not null &&
-                            (tileToCheck.piece is null)
-                           ) {
-                            tilesToMark.Add(tileToCheck);
-                            if (cellCondition.endOnCapture && tileToCheck.piece is not null) {
-                                markNextLayer = false;
-                            }
-                        }
-                        else if (cellCondition.obligatory) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.Capture:
-                        if (tileToCheck is not null &&
-                            tileToCheck.piece is not null &&
-                            tileToCheck.piece.GetOwnerID() != tileStart.piece.GetOwnerID()) {
-                            tilesToMark.Add(tileToCheck);
-                            if (cellCondition.endOnCapture) {
-                                markNextLayer = false;
-                            }
-                        }
-                        else if (cellCondition.obligatory) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.CaptureAny:
-                        if (tileToCheck is not null &&
-                            tileToCheck.piece is not null) {
-                            tilesToMark.Add(tileToCheck);
-                            if (cellCondition.endOnCapture) {
-                                markNextLayer = false;
-                            }
-                        }
-                        else if (cellCondition.obligatory) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                    case CellContent.Move:
-                        if (tileToCheck is not null && tileToCheck.piece is null) {
-                            tilesToMark.Add(tileToCheck);
-                        }
-                        else if (cellCondition.obligatory) {
-                            markTilesForMovement = false;
-                        }
-
-                        break;
-                }
+                (markTilesForMovement, markNextLayer, addTileToMark) = MarkTilesForMovement(tileStart, cellCondition, tileToCheck);
+                if (addTileToMark) { tilesToMark.Add((tileToCheck, this)); }
             }
 
             Debug.Log(markTilesForMovement + " on finding possible movements");
             if (markTilesForMovement) {
-                foreach (var tile in tilesToMark) {
+                foreach (var tileAndMovement in tilesToMark) {
                     // Debug.Log("marking on tile " + tile.tileNumber);
-                    tile.MarkAsPossibleMovement(true);
+                    tileAndMovement.tile.MarkAsPossibleMovement(tileAndMovement.movement);
                 }
             }
         }
+    }
+
+    private static (bool markTilesForMovement, bool markNextLayer, bool addTileToMark) MarkTilesForMovement(Tile tileStart,
+        CellCondition cellCondition, Tile tileToCheck)
+    {
+        bool addTileToMark = false;
+        bool markTilesForMovement = true;
+        bool markNextLayer = true;
+        
+        switch (cellCondition.cellContent)
+        {
+            //conditional types
+            case CellContent.Empty:
+                if (tileToCheck is null || tileToCheck.piece is not null)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.Occupied:
+                if (tileToCheck is null || tileToCheck.piece is null)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.Enemy:
+                if (tileToCheck is null || tileToCheck.piece is null ||
+                    tileToCheck.piece.GetOwnerID() == tileStart.piece.GetOwnerID())
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.Ally:
+                if (tileToCheck is null || tileToCheck.piece is null ||
+                    tileToCheck.piece.GetOwnerID() != tileStart.piece.GetOwnerID())
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            //movement types
+            case CellContent.MoveAndCapture:
+                if (tileToCheck is not null &&
+                    (tileToCheck.piece is null || tileToCheck.piece.GetOwnerID() != tileStart.piece.GetOwnerID())
+                   )
+                {
+                    addTileToMark = true;
+                    if (cellCondition.endOnCapture && tileToCheck.piece is not null)
+                    {
+                        markNextLayer = false;
+                    }
+                }
+                else if (cellCondition.obligatory)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.MoveAndCaptureAny:
+                if (tileToCheck is not null &&
+                    (tileToCheck.piece is null)
+                   )
+                {
+                    addTileToMark = true;
+                    if (cellCondition.endOnCapture && tileToCheck.piece is not null)
+                    {
+                        markNextLayer = false;
+                    }
+                }
+                else if (cellCondition.obligatory)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.Capture:
+                if (tileToCheck is not null &&
+                    tileToCheck.piece is not null &&
+                    tileToCheck.piece.GetOwnerID() != tileStart.piece.GetOwnerID())
+                {
+                    addTileToMark = true;
+                    if (cellCondition.endOnCapture)
+                    {
+                        markNextLayer = false;
+                    }
+                }
+                else if (cellCondition.obligatory)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.CaptureAny:
+                if (tileToCheck is not null &&
+                    tileToCheck.piece is not null)
+                {
+                    addTileToMark = true;
+                    if (cellCondition.endOnCapture)
+                    {
+                        markNextLayer = false;
+                    }
+                }
+                else if (cellCondition.obligatory)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+            case CellContent.Move:
+                if (tileToCheck is not null && tileToCheck.piece is null)
+                {
+                    addTileToMark = true;
+                }
+                else if (cellCondition.obligatory)
+                {
+                    markTilesForMovement = false;
+                }
+
+                break;
+        }
+
+        return (markTilesForMovement, markNextLayer, addTileToMark);
     }
 
     public int AddLayer() {

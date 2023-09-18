@@ -12,7 +12,7 @@ public class Tile : MonoBehaviour
     public (int row,int column) tileNumber;
     public Piece? piece = null;
     public GameObject possibleMoveMarker;
-
+    public Movement markingMovement;
     public Color32 originalColor;
 
     public void SetTileNumber((int,int) tileNumber) {
@@ -60,12 +60,13 @@ public class Tile : MonoBehaviour
                 originalColor.b,
                 originalColor.a);
         }
-        MarkAsPossibleMovement(false);
+        MarkAsPossibleMovement(null);
     }
 
-    public void MarkAsPossibleMovement(bool possible)
+    public void MarkAsPossibleMovement(Movement markingMovement)
     {
-        if (possible) {
+        this.markingMovement = markingMovement;
+        if (markingMovement is not null) {
             //Debug.Log("Mark as possiblemovement called on tile "+tileNumber);
             possibleMoveMarker.SetActive(true);
         }

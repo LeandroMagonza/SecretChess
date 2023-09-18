@@ -39,19 +39,28 @@ public class Piece : MonoBehaviour
     }
 
 
-    public void ShowPossibleMoves(Tile tile) {
+    public void ShowPossibleMoves(Tile tile)
+    {
+
+        movementPattern.ShowPossibleMoves(tile, amountOfMoves, tile.piece.InvertMovement());
+    }
+
+    public bool InvertMovement()
+    {
         bool invert = false;
-        if (tile.piece.owner == 0) {
+        if (owner == 0) {
             invert = false;
         }
-        else if(tile.piece.owner == 1) {
+        else if(owner == 1) {
             invert = true;
         }
         else {
-            Debug.Log("Invalid owner "+tile.piece.owner);
+            Debug.Log("Invalid owner "+owner);
         }
-        movementPattern.ShowPossibleMoves(tile,amountOfMoves,invert);
+
+        return invert;
     }
+
 
     public void MarkAsKing(bool king) {
         kingMarker.SetActive(king);
