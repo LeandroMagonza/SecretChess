@@ -12,7 +12,8 @@ public class Tile : MonoBehaviour
     public (int row,int column) tileNumber;
     public Piece? piece = null;
     public GameObject possibleMoveMarker;
-    public Movement markingMovement;
+    public (Movement movement, int layer, (int row, int column) offset )? markingMovement;
+    public bool marked = false;
     public Color32 originalColor;
 
     public void SetTileNumber((int,int) tileNumber) {
@@ -63,15 +64,17 @@ public class Tile : MonoBehaviour
         MarkAsPossibleMovement(null);
     }
 
-    public void MarkAsPossibleMovement(Movement markingMovement)
+    public void MarkAsPossibleMovement((Movement movement, int layer, (int row, int column) offset )? markingMovement)
     {
         this.markingMovement = markingMovement;
         if (markingMovement is not null) {
             //Debug.Log("Mark as possiblemovement called on tile "+tileNumber);
             possibleMoveMarker.SetActive(true);
+            marked = true;
         }
         else {
             possibleMoveMarker.SetActive(false);
+            marked = false;
         }
     }
 

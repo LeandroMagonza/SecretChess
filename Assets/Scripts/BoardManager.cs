@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
@@ -15,8 +16,8 @@ public class BoardManager : MonoBehaviour {
     public GameObject tilePrefab;
     public GameMode gamemode = GameMode.TurnBased;
 
-    public SortedDictionary<int,(Piece movingPiece, Tile endingTile)> moveQueue = new SortedDictionary<int, (Piece movingPiece, Tile endingTile)>();
-    public SortedDictionary<int,(Piece movingPiece, Tile endingTile)> kingMoveQueue = new SortedDictionary<int, (Piece movingPiece, Tile endingTile)>();
+    public SortedDictionary<int,(Piece movingPiece, Tile endingTile,(Movement movement, int layer, (int row, int column) offset ))> moveQueue = new SortedDictionary<int, (Piece movingPiece, Tile endingTile, (Movement movement, int layer, (int row, int column) offset) moveData)>();
+    public SortedDictionary<int,(Piece movingPiece, Tile endingTile,(Movement movement, int layer, (int row, int column) offset ))> kingMoveQueue = new SortedDictionary<int, (Piece movingPiece, Tile endingTile, (Movement movement, int layer, (int row, int column) offset) moveData)>();
     public delegate void TileSelected(bool selected);
 
     public static event TileSelected OnTileSelected;
@@ -138,8 +139,8 @@ public class BoardManager : MonoBehaviour {
         int randomPieceCrownedKing;
         randomPieceCrownedKing = Random.Range(0, PlayerController.Instance.players[0]
             .piecesOwnedByPlayer.Count);
-        Debug.Log("king 0 " + randomPieceCrownedKing + " between 0 and " + PlayerController.Instance.players[0]
-            .piecesOwnedByPlayer.Count);
+        // Debug.Log("king 0 " + randomPieceCrownedKing + " between 0 and " + PlayerController.Instance.players[0]
+        //     .piecesOwnedByPlayer.Count);
         if (PlayerController.Instance.players[0].king is null) {
             PlayerController.Instance.players[0].SetKing(
                 PlayerController.Instance.players[0]
@@ -149,8 +150,8 @@ public class BoardManager : MonoBehaviour {
 
         randomPieceCrownedKing = Random.Range(0, PlayerController.Instance.players[1]
             .piecesOwnedByPlayer.Count);
-        Debug.Log("king 1 " + randomPieceCrownedKing + " between 0 and " + PlayerController.Instance.players[1]
-            .piecesOwnedByPlayer.Count);
+        // Debug.Log("king 1 " + randomPieceCrownedKing + " between 0 and " + PlayerController.Instance.players[1]
+        //     .piecesOwnedByPlayer.Count);
         if (PlayerController.Instance.players[1].king is null) {
             PlayerController.Instance.players[1].SetKing(
                 PlayerController.Instance.players[1]
@@ -196,22 +197,33 @@ public class BoardManager : MonoBehaviour {
         Tile selectedTile = currentlySelectedTile;
         PlayerData actingPlayer = PlayerController.Instance.players[selectedTile.piece.GetOwnerID()];
         // para que deje de mostrarse los posibles movimientos en el tablero, y el tile como seleccionado
-        SetSelectedTile(null);
         switch (gamemode) {
             case GameMode.TurnBased:
-                ExecuteMove(selectedTile.piece,endingTile);
+                //aca esta medio al pedo pasar por separado el markingmovement y el ending tile,
+                //porque el movimiento a ejecutar es el mismo que esta marcado y no pudo haber sido modificado en el medio
+                //pense en que el marking movement sea nuleable en execute move, pero me traia problemas
+                ExecuteMove(selectedTile.piece,endingTile,endingTile.markingMovement.GetValueOrDefault());
                 break;
             case GameMode.Simultaneous:
                 int playerInitiative = actingPlayer.initiative;
+                if (endingTile.markingMovement is null) {
+                    throw new Exception("endingTile.markingMovement is null");
+                }
+                if (endingTile.markingMovement.GetValueOrDefault().movement is null) {
+                    throw new Exception("endingTile.markingMovement.GetValueOrDefault().movement is null");
+                }
+                if (endingTile.markingMovement.GetValueOrDefault().movement.movementStencil is null) {
+                    throw new Exception("endingTile.markingMovement.GetValueOrDefault().movement.movementStencil is null");
+                }
                 if (actingPlayer.king == selectedTile.piece && !kingMoveQueue.ContainsKey(playerInitiative)) {
                     //Debug.Log("agrego moviento iniciativa KING"+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+tileEnd.tileNumber);   
                     kingMoveQueue.Add(playerInitiative,
-                        (selectedTile.piece, endingTile));
+                        (selectedTile.piece, endingTile,endingTile.markingMovement.GetValueOrDefault()));
                 }
                 else if (!moveQueue.ContainsKey(playerInitiative)) { 
                     //Debug.Log("agrego moviento iniciativa "+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+tileEnd.tileNumber);   
                     moveQueue.Add(playerInitiative,
-                        (selectedTile.piece, endingTile));
+                        (selectedTile.piece, endingTile, endingTile.markingMovement.GetValueOrDefault()));
                 }
                 else {
                     throw new Exception("Tried to add a move to the queue with an already added initiative");
@@ -225,6 +237,7 @@ public class BoardManager : MonoBehaviour {
                 //Debug.Log("No gamemode has been set");
                 break;
         }
+        SetSelectedTile(null);
         // el jugador con la iniciativa con valor mas bajo actua antes, se le suma 1 a este despues de sumar una jugada
         // para que en el proximo movimiento tenga prioridad el otro
         
@@ -241,13 +254,19 @@ public class BoardManager : MonoBehaviour {
             // foreach (var VARIABLE in moveQueue) {
             //     Debug.Log("iniciativa "+VARIABLE.Key +" "+VARIABLE.Value.movingPiece.name+" "+VARIABLE.Value.tileEnd.tileNumber);
             // }
-            List<SortedDictionary<int, (Piece movingPiece, Tile endingTile)>> queues =
-                new List<SortedDictionary<int, (Piece movingPiece, Tile endingTile)>>()
+             
+            List<SortedDictionary<int,(Piece movingPiece, Tile endingTile,(Movement movement, int layer, (int row, int column) offset ) moveData)>> queues =
+                new List<SortedDictionary<int, (Piece movingPiece, Tile endingTile, (Movement movement, int layer, (int row, int column) offset) moveData)>>()
                     {kingMoveQueue,moveQueue };
             foreach (var queue in queues) {
                 foreach (var move in queue) {
                     yield return new WaitForSeconds(.5f);
-                    ExecuteMove(move.Value.movingPiece,move.Value.endingTile);    
+                    if (move.Value.moveData.movement is null) {
+                        throw new Exception("move.Value.moveData. movement is null");
+                    } if (move.Value.moveData.movement.movementStencil is null) {
+                        throw new Exception("move.Value.moveData. movement. movementstencil is null");
+                    }
+                    ExecuteMove(move.Value.movingPiece,move.Value.endingTile,move.Value.moveData);    
                 }
             }
             // al jugador con mas iniciativa se le asigna la iniciativa mas baja (0) para que la proxima ronda vaya primero
@@ -264,10 +283,11 @@ public class BoardManager : MonoBehaviour {
             
             
         }
-        Debug.Log("Exiting checkmovequeue");
+        //Debug.Log("Exiting checkmovequeue");
     }
 
-    public void ExecuteMove(Piece movingPiece, Tile tileEnd) {
+    public void ExecuteMove(Piece movingPiece, Tile tileEnd,
+        (Movement movement, int layer, (int row, int column) offset) intendedMovementEnd) {
         //chequea si la pieza fue comida antes de su turno
         //if (movingPiece is null) return;
         if (movingPiece == null) return;
@@ -275,27 +295,58 @@ public class BoardManager : MonoBehaviour {
         //hay que recorrer en los movimientos del marking movement, y vamos seteando ending tile hasta encontrar un tile que permita captura pero corte movimiento despues 
         //tileEnd.markingMovement
         Tile tileStart = FindTileOccupiedByPieceInBoard(movingPiece);
-        foreach (var stepMovements in tileEnd.markingMovement.movementStencil){
+
+        if (true) {
+            if (intendedMovementEnd.movement is null) {
+                throw new Exception("intendedmovementend. movement is null");
+            } if (intendedMovementEnd.movement.movementStencil is null) {
+                throw new Exception("intendedmovementend. movement. movementstencil is null");
+            }
+            foreach (var stepMovements in intendedMovementEnd.movement.movementStencil.Select((x, i) => new { dictionary = x, layer = i }) ) {
+                //stepMovements.layer;
                 //startingTile.tileNumber.row
                 //startingTile.tileNumber.column
-                    /*stepMovements.ContainsKey((
-                        startingTile.tileNumber.row - tileEnd.tileNumber.row,
-                        startingTile.tileNumber.column - tileEnd.tileNumber.column
-                        ))*/
-                    foreach (var content in stepMovements)
-                    {
-                        (int row, int column) offset = content.Key;
-                        CellCondition cellCondition = content.Value;
+                //si llegamos hasta la capa del intendedMovement, siginifca que el camino estaba vacio de ser un requerimiento
+                Debug.Log("Checking layer "+stepMovements.layer+" == "+intendedMovementEnd.layer +" = "+
+                          (stepMovements.layer == intendedMovementEnd.layer));
+                if (
+                    stepMovements.layer == intendedMovementEnd.layer
+                    // &&
+                    // stepMovements.dictionary.ContainsKey((
+                    //     intendedMovementEnd.offset.row,
+                    //     intendedMovementEnd.offset.column
+                    // ))
+                ) {
+                    //no change in ending tile, movement executed as planned
+                    break;
+                }
+                foreach (var content in stepMovements.dictionary)
+                {
+                    (int row, int column) offset = content.Key;
+                    CellCondition cellCondition = content.Value;
                         
-                        Tile tileToCheck = BoardManager.Instance.GetTile(
-                            tileStart.tileNumber.row + offset.row * (movingPiece.InvertMovement() ? -1 : 1),
-                            tileStart.tileNumber.column + offset.column * (movingPiece.InvertMovement() ? -1 : 1)
-                        );
+                    Tile tileToCheck = GetTile(
+                        tileStart.tileNumber.row + offset.row * (movingPiece.InvertMovement() ? -1 : 1),
+                        tileStart.tileNumber.column + offset.column * (movingPiece.InvertMovement() ? -1 : 1)
+                    );
+                    (bool markTilesForMovement,bool markNextLayer,bool addTileToMark) result =
+                        intendedMovementEnd.movement.CheckTileForMovement(tileStart.piece, cellCondition, tileToCheck);
+                    //si el resultado da que no marquemos la proxima capa, significa que encontramos un obstaculo, y como ya
+                    //chequeamos arriba, sabemos que estamos una capa anterior, por lo tanto encontramos una pieza en el camino
+                    //y tenemos que terminar el movimiento en la casilla del obstaculo
+                    Debug.Log("Tile"+ (tileStart.tileNumber.row + offset.row,
+                        tileStart.tileNumber.column + offset.column)+" Mark next layer "+result.markNextLayer);
+                    if (!result.markNextLayer) {
+                        tileEnd = tileToCheck;
+                        break;
                     }
+                }
 
+            }
         }
-        tileStart?.SetPiece(null);
-        
+
+
+        tileStart.SetPiece(null);
         Piece capturedPiece = tileEnd.piece;
         movingPiece.amountOfMoves++;
         tileEnd.SetPiece(movingPiece);
@@ -324,7 +375,7 @@ public class BoardManager : MonoBehaviour {
         }
 
         board = new Tile[8, 8];
-        Debug.Log("About to reset players " + PlayerController.Instance.players.Count);
+        //Debug.Log("About to reset players " + PlayerController.Instance.players.Count);
         PlayerController.Instance.ResetPlayer(0);
         PlayerController.Instance.ResetPlayer(1);
         PlayerController.Instance.currentPlayer = 0;

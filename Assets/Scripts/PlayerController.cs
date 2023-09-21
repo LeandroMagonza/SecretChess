@@ -112,7 +112,7 @@ public class PlayerData {
     }
 
     public void SetInitiative(int initiative) {
-        Debug.Log("seteada iniciativa "+ initiative);
+        //Debug.Log("seteada iniciativa "+ initiative);
         this.initiative = initiative;
     }
 
@@ -120,7 +120,7 @@ public class PlayerData {
         this.playerAvatar = playerAvatar;
         playerAvatar.owner = playerID;
         playerAvatar.DisplayInitiative(initiative);
-        Debug.Log(playerAvatar.gameObject.name+" setting owner to: "+playerAvatar.owner);
+        //Debug.Log(playerAvatar.gameObject.name+" setting owner to: "+playerAvatar.owner);
         playerAvatar.SetOriginalColor(pieceColor);
         return this;
     }
