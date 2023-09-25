@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 public class Piece : MonoBehaviour
@@ -15,14 +16,21 @@ public class Piece : MonoBehaviour
     public int maxLives = 1;
     public int amountOfLivesLeft = 1;
     public int value = 3;
+    
+    //Sound
+    private AudioSource _audioSource;
+
+    public AudioClip captureClip;
+    public AudioClip getCapturedClip;
+    public AudioClip moveClip;
     //public int priority = 0;
     [SerializeField]
     int owner;
-
  
     void Start()
     {
         kingMarker = transform.Find("KingMarker").gameObject;
+        _audioSource = GetComponent<AudioSource>();
     }
 
     public void SetOwner(int ownerID,PlayerData ownerData)
@@ -41,7 +49,6 @@ public class Piece : MonoBehaviour
 
     public void ShowPossibleMoves(Tile tile)
     {
-
         movementPattern.ShowPossibleMoves(tile, amountOfMoves, tile.piece.InvertMovement());
     }
 
@@ -60,11 +67,25 @@ public class Piece : MonoBehaviour
 
         return invert;
     }
-
-
     public void MarkAsKing(bool king) {
         kingMarker.SetActive(king);
     }
+
+    #region OnEvent
+    public void Capture(Piece capturedPiece) {
+        //kingMarker.SetActive(king);
+        _audioSource.PlayOneShot(captureClip);
+    }
+    public void GetCaptured(Piece capturerPiece) {
+        //kingMarker.SetActive(king);
+        _audioSource.PlayOneShot(getCapturedClip);
+        PlayerController.Instance.players[GetOwnerID()].RemovePiece(this);
+    }
+    public void Move(Tile targetTile) {
+        //kingMarker.SetActive(king);
+        _audioSource.PlayOneShot(moveClip);
+    }
+    #endregion
 }
 
 public enum BasicPieces {

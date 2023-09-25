@@ -197,33 +197,35 @@ public class BoardManager : MonoBehaviour {
         Tile selectedTile = currentlySelectedTile;
         PlayerData actingPlayer = PlayerController.Instance.players[selectedTile.piece.GetOwnerID()];
         // para que deje de mostrarse los posibles movimientos en el tablero, y el tile como seleccionado
+        var endingTileMarkingMovement = endingTile.markingMovement;
+        SetSelectedTile(null);
         switch (gamemode) {
             case GameMode.TurnBased:
                 //aca esta medio al pedo pasar por separado el markingmovement y el ending tile,
                 //porque el movimiento a ejecutar es el mismo que esta marcado y no pudo haber sido modificado en el medio
                 //pense en que el marking movement sea nuleable en execute move, pero me traia problemas
-                ExecuteMove(selectedTile.piece,endingTile,endingTile.markingMovement.GetValueOrDefault());
+                ExecuteMove(selectedTile.piece,endingTile,endingTileMarkingMovement.GetValueOrDefault());
                 break;
             case GameMode.Simultaneous:
                 int playerInitiative = actingPlayer.initiative;
-                if (endingTile.markingMovement is null) {
-                    throw new Exception("endingTile.markingMovement is null");
+                if (endingTileMarkingMovement is null) {
+                    throw new Exception("endingTileMarkingMovement is null");
                 }
-                if (endingTile.markingMovement.GetValueOrDefault().movement is null) {
-                    throw new Exception("endingTile.markingMovement.GetValueOrDefault().movement is null");
+                if (endingTileMarkingMovement.GetValueOrDefault().movement is null) {
+                    throw new Exception("endingTileMarkingMovement.GetValueOrDefault().movement is null");
                 }
-                if (endingTile.markingMovement.GetValueOrDefault().movement.movementStencil is null) {
-                    throw new Exception("endingTile.markingMovement.GetValueOrDefault().movement.movementStencil is null");
+                if (endingTileMarkingMovement.GetValueOrDefault().movement.movementStencil is null) {
+                    throw new Exception("endingTileMarkingMovement.GetValueOrDefault().movement.movementStencil is null");
                 }
                 if (actingPlayer.king == selectedTile.piece && !kingMoveQueue.ContainsKey(playerInitiative)) {
                     //Debug.Log("agrego moviento iniciativa KING"+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+tileEnd.tileNumber);   
                     kingMoveQueue.Add(playerInitiative,
-                        (selectedTile.piece, endingTile,endingTile.markingMovement.GetValueOrDefault()));
+                        (selectedTile.piece, endingTile,endingTileMarkingMovement.GetValueOrDefault()));
                 }
                 else if (!moveQueue.ContainsKey(playerInitiative)) { 
                     //Debug.Log("agrego moviento iniciativa "+playerInitiative+ "pieza "+selectedTile.piece.name+ " tile "+tileEnd.tileNumber);   
                     moveQueue.Add(playerInitiative,
-                        (selectedTile.piece, endingTile, endingTile.markingMovement.GetValueOrDefault()));
+                        (selectedTile.piece, endingTile, endingTileMarkingMovement.GetValueOrDefault()));
                 }
                 else {
                     throw new Exception("Tried to add a move to the queue with an already added initiative");
@@ -237,7 +239,6 @@ public class BoardManager : MonoBehaviour {
                 //Debug.Log("No gamemode has been set");
                 break;
         }
-        SetSelectedTile(null);
         // el jugador con la iniciativa con valor mas bajo actua antes, se le suma 1 a este despues de sumar una jugada
         // para que en el proximo movimiento tenga prioridad el otro
         
@@ -307,16 +308,9 @@ public class BoardManager : MonoBehaviour {
                 //startingTile.tileNumber.row
                 //startingTile.tileNumber.column
                 //si llegamos hasta la capa del intendedMovement, siginifca que el camino estaba vacio de ser un requerimiento
-                Debug.Log("Checking layer "+stepMovements.layer+" == "+intendedMovementEnd.layer +" = "+
-                          (stepMovements.layer == intendedMovementEnd.layer));
-                if (
-                    stepMovements.layer == intendedMovementEnd.layer
-                    // &&
-                    // stepMovements.dictionary.ContainsKey((
-                    //     intendedMovementEnd.offset.row,
-                    //     intendedMovementEnd.offset.column
-                    // ))
-                ) {
+                //Debug.Log("Checking layer "+stepMovements.layer+" == "+intendedMovementEnd.layer +" = "+
+                          //(stepMovements.layer == intendedMovementEnd.layer));
+                if (stepMovements.layer == intendedMovementEnd.layer) {
                     //no change in ending tile, movement executed as planned
                     break;
                 }
@@ -334,8 +328,8 @@ public class BoardManager : MonoBehaviour {
                     //si el resultado da que no marquemos la proxima capa, significa que encontramos un obstaculo, y como ya
                     //chequeamos arriba, sabemos que estamos una capa anterior, por lo tanto encontramos una pieza en el camino
                     //y tenemos que terminar el movimiento en la casilla del obstaculo
-                    Debug.Log("Tile"+ (tileStart.tileNumber.row + offset.row,
-                        tileStart.tileNumber.column + offset.column)+" Mark next layer "+result.markNextLayer);
+                    // Debug.Log("Tile"+ (tileStart.tileNumber.row + offset.row,
+                    //     tileStart.tileNumber.column + offset.column)+" Mark next layer "+result.markNextLayer);
                     if (!result.markNextLayer) {
                         tileEnd = tileToCheck;
                         break;
@@ -347,11 +341,16 @@ public class BoardManager : MonoBehaviour {
 
 
         tileStart.SetPiece(null);
+        movingPiece.Move(tileEnd);
         Piece capturedPiece = tileEnd.piece;
         movingPiece.amountOfMoves++;
         tileEnd.SetPiece(movingPiece);
 
         if (capturedPiece) {
+            movingPiece.Capture(capturedPiece);
+            capturedPiece.GetCaptured(movingPiece);
+            
+                
             if (capturedPiece == PlayerController.Instance.players[0].king) {
                 matchEndText.gameObject.SetActive(true);
                 matchEndText.text = "BLUE WON";

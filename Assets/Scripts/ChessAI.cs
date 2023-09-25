@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 // keeps track of game logic and chess rules
 public class ChessAI : MonoBehaviour {
@@ -54,7 +57,8 @@ public class ChessAI : MonoBehaviour {
     // returns all the moves from the given posn
     List<Move> MovesFromPosn ((int row,int column) from)
     {
-        return GetPiece(from)?.movementPattern.GetAllMoves();
+        throw new Exception("called uninmplemente chess ai method");
+        //return GetPiece(from)?.movementPattern.GetAllMoves(from);
     }
 
     // changes the board state to reflect the given move being played

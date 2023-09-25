@@ -26,6 +26,19 @@ public class Movement {
     private List<Phase> disabledOnPhase;
 
     public void MarkPossibleMovements(Tile tileStart, bool invert) {
+        foreach (var tileAndMovement in GetPossibleMoves(tileStart, invert)) { 
+            tileAndMovement.endTile.MarkAsPossibleMovement((tileAndMovement.markingData));
+        }
+    }
+    public List<(Tile endTile, (Movement movement, int layer, (int row, int column) offset) markingData)> GetPossibleMoves(Tile tileStart, bool invert) {
+        List<(Tile endTile, (Movement movement, int layer, (int row, int column) offset) markingData)> markedTiles =
+            new List<(Tile tile, (Movement movement, int layer, (int row, int column) offset))>();
+        if (tileStart.piece is null) {
+            //devuelve la lista vacia
+            Debug.Log("Selected piece was null, this shouldnt happen but idk");
+            return markedTiles;
+            
+        }
         if (
             (enableMovementFromMove is not null &&
              enableMovementFromMove > tileStart.piece.amountOfMoves)
@@ -35,17 +48,19 @@ public class Movement {
         ) {
             Debug.Log("Movement disabled on this amount of moves " + enableMovementFromMove + ">" +
                       tileStart.piece.amountOfMoves + ">" + enableMovementToMove);
-            return;
+            //devuelve la lista vacia
+            return markedTiles;
         }
 
         //Debug.Log("Called markpossible movements on tile " + tileStart.tileNumber);
         bool markTilesForMovement = true;
         bool markNextLayer = true;
-
+        
         for (int layer = 0; layer < movementStencil.Count; layer++) {
             var stepMovements = movementStencil[layer];
             if (!markTilesForMovement || !markNextLayer) {
-                return;
+                //devuelve la lista vacia
+                return markedTiles;
             }
 
             List<(Tile tile, (Movement movement, int layer, (int row, int column) offset) markingData)> tilesToMark =
@@ -53,7 +68,8 @@ public class Movement {
             foreach (var content in stepMovements) {
                 bool addTileToMark = false;
                 if (!markTilesForMovement) {
-                    return;
+                    //devuelve la lista vacia
+                    return markedTiles;
                 }
 
                 (int row, int column) offset = content.Key;
@@ -82,10 +98,11 @@ public class Movement {
             if (markTilesForMovement) {
                 foreach (var tileAndMovement in tilesToMark) {
                     // Debug.Log("marking on tile " + tile.tileNumber);
-                    tileAndMovement.tile.MarkAsPossibleMovement((tileAndMovement.markingData));
+                    markedTiles.Add((tileAndMovement.tile, tileAndMovement.markingData));
                 }
             }
         }
+        return markedTiles;
     }
 
     public (bool markTilesForMovement, bool markNextLayer, bool addTileToMark) CheckTileForMovement(

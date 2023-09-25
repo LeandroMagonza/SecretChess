@@ -15,8 +15,14 @@ public class MovementPattern {
         }
     }
 
-    public List<Move> GetAllMoves() {
-        return new List<Move>();
+    public List<(Tile tile, (Movement movement, int layer, (int row, int column) offset) markingData)> GetAllMoves(Tile tile, int amountOfMoves, bool invert) {
+        List<(Tile tile, (Movement movement, int layer, (int row, int column) offset) markingData)> moves = new List<(Tile tile, (Movement movement, int layer, (int row, int column) offset) markingData)>(); 
+        foreach (var movement in movements) {
+            foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
+                moves.Add(endTileAndMarkingData);
+            }
+        }
+        return moves;
     }
 
     public void AddMovement(Movement movement,MovementSymmetry symmetry = MovementSymmetry.None) {
