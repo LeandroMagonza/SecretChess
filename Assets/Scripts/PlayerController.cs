@@ -78,6 +78,9 @@ public class PlayerController : MonoBehaviour {
 
     public IEnumerator ChooseMove(int playerID, PlayerData playerData) {
         bool possibleMoveFound = false;
+        ChessAI.Instance.SetBoard(BoardManager.Instance.board);
+        Move move = ChessAI.Instance.GetAIMove();
+        
         while (!possibleMoveFound) {
             Piece testingPiece = playerData.piecesOwnedByPlayer[Random.Range(0, playerData.piecesOwnedByPlayer.Count)];
             Tile startingTile = BoardManager.Instance.FindTileOccupiedByPieceInBoard(testingPiece);

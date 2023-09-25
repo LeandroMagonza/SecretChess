@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MovementPattern {
     [SerializeField]
-    private List<Movement> movements = new List<Movement>();
+    private List<Movement> movements = new ();
     // private int? tileNumber = null;
 
     public void ShowPossibleMoves(Tile tile, int amountOfMoves, bool invert) {
@@ -20,6 +20,17 @@ public class MovementPattern {
         foreach (var movement in movements) {
             foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
                 moves.Add(endTileAndMarkingData);
+            }
+        }
+        return moves;
+    }    
+    public List<Move> GetAllMovesForAI(Piece movingPiece,(int row, int column) startingTileNumber, int amountOfMoves, bool invert)
+    {
+        List<Move> moves = new List<Move>();
+        foreach (var movement in movements) {
+            //modify get possible moves so it also works with ai, might have to copy it and change stuff
+            foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
+                moves.Add(new Move(startingTileNumber, endTileAndMarkingData.endTile.tileNumber,endTileAndMarkingData.endTile.piece));
             }
         }
         return moves;

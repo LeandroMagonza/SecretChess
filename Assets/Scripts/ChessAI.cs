@@ -8,9 +8,18 @@ using Random = UnityEngine.Random;
 
 // keeps track of game logic and chess rules
 public class ChessAI : MonoBehaviour {
+    private static ChessAI instance;
+    public static ChessAI Instance {
+        get {
+            if (instance == null)
+                instance = FindObjectOfType<ChessAI>();
+            if (instance == null)
+                Debug.LogError("Singleton<" + typeof(ChessAI) + "> instance has been not found.");
+            return instance;
+        }
+    }
 
-
-    private Tile[,] testingBoard = new Tile[8, 8];
+    private Piece[,] testingBoard = new Piece[8, 8];
 
     /*
      * 
@@ -47,7 +56,7 @@ public class ChessAI : MonoBehaviour {
                 (int row,int column) from = (x, y);
                 if (WhatTeam(from) == team)
                 {
-                    moves.AddRange(MovesFromPosn(from));
+                    moves.AddRange(MovesFromPosn(from,0, team != 0));
                 }
             }
         }
@@ -55,10 +64,10 @@ public class ChessAI : MonoBehaviour {
     }
 
     // returns all the moves from the given posn
-    List<Move> MovesFromPosn ((int row,int column) from)
+    List<Move> MovesFromPosn ((int row,int column) from, int team, bool invert)
     {
-        throw new Exception("called uninmplemente chess ai method");
-        //return GetPiece(from)?.movementPattern.GetAllMoves(from);
+        Piece movingPiece = GetPiece(from);
+        return movingPiece?.movementPattern.GetAllMovesForAI(movingPiece,from,team,invert);
     }
 
     // changes the board state to reflect the given move being played
@@ -145,13 +154,13 @@ public class ChessAI : MonoBehaviour {
     // returns the piece at the given posn
     public Piece GetPiece((int row,int column) posn)
     {
-        return testingBoard[posn.column, posn.row].piece;
+        return testingBoard[posn.column, posn.row];
     }
 
     // sets the given piece at the given posn
     public void SetPiece((int row,int column) posn, Piece piece)
     {
-        testingBoard[posn.column, posn.row].SetPiece(piece);
+        testingBoard[posn.column, posn.row] = (piece);
     }
 
     // is the piece at the given posn an enemy of the given team?
@@ -379,7 +388,22 @@ public class ChessAI : MonoBehaviour {
         yield return new WaitForSeconds(0);
         GetAIMove();
     }
-    
+
+    public void SetBoard(Tile[,] boardToCopy)
+    {
+        value = 0;
+        for (int row = 0; row < boardToCopy.GetLength(0); row++)
+        {
+            for (int column = 0; column < boardToCopy.GetLength(1); column++)
+            {
+                testingBoard[row, column] = boardToCopy[row, column].piece;
+                if (boardToCopy[row, column].piece is not null)
+                {
+                    value =+ boardToCopy[row, column].piece.value*OwnerToTeam(boardToCopy[row, column].piece.GetOwnerID());
+                }
+            }
+        }
+    }
     // returns the next move for the AI
     public Move GetAIMove()
     {

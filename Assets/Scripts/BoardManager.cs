@@ -21,7 +21,7 @@ public class BoardManager : MonoBehaviour {
     public delegate void TileSelected(bool selected);
 
     public static event TileSelected OnTileSelected;
-    private Tile[,] board = new Tile[8, 8];
+    public Tile[,] board = new Tile[8, 8];
     private Row[] boardInRows = new Row[8];
     private Tile currentlySelectedTile;
     private static BoardManager instance;
