@@ -16,23 +16,39 @@ public class Piece : MonoBehaviour
     public int maxLives = 1;
     public int amountOfLivesLeft = 1;
     public int value = 3;
-    
-    //Sound
-    private AudioSource _audioSource;
 
-    public AudioClip captureClip;
-    public AudioClip getCapturedClip;
-    public AudioClip moveClip;
+    //Sound
+    //private AudioSource _audioSource;
+
+    //public AudioClip captureClip;
+    //public AudioClip getCapturedClip;
+    //public AudioClip moveClip;
+
+    private PieceData pieceData;
+
     //public int priority = 0;
     [SerializeField]
     int owner;
  
     void Start()
     {
-        kingMarker = transform.Find("KingMarker").gameObject;
-        _audioSource = GetComponent<AudioSource>();
-    }
+        Debug.Log(pieceData.move_Clip.ToString());
 
+        kingMarker = transform.Find("KingMarker").gameObject;
+        //_audioSource = GetComponent<AudioSource>();
+    }
+    public void SetData(ref PieceData data) 
+    {
+        Debug.Log(data.move_Clip.ToString());
+
+        pieceData = data;
+        Debug.Log(pieceData.move_Clip.ToString());
+    }
+    public PieceData GetData() { 
+        
+        Debug.Log(pieceData.move_Clip.ToString());
+        return pieceData; 
+    } 
     public void SetOwner(int ownerID,PlayerData ownerData)
     {
         this.owner = ownerID;
@@ -74,20 +90,24 @@ public class Piece : MonoBehaviour
     #region OnEvent
     public void Capture(Piece capturedPiece) {
         //kingMarker.SetActive(king);
-        _audioSource.PlayOneShot(captureClip);
+        //_audioSource.PlayOneShot(captureClip);
+        ManagerEffects.Instance.PlaySound(pieceData.capture_Clip);
+
     }
     public void GetCaptured(Piece capturerPiece) {
         //kingMarker.SetActive(king);
-        _audioSource.PlayOneShot(getCapturedClip);
+        //_audioSource.PlayOneShot(getCapturedClip);
+        ManagerEffects.Instance.PlayEffectIn(pieceData.die_ParticleEffect, pieceData.die_Clip, transform.position);
         PlayerController.Instance.players[GetOwnerID()].RemovePiece(this);
     }
     public void Move(Tile targetTile) {
         //kingMarker.SetActive(king);
-        _audioSource.PlayOneShot(moveClip);
+        ManagerEffects.Instance?.PlaySound(pieceData.move_Clip);
+        //_audioSource.PlayOneShot(moveClip);
     }
     #endregion
 }
 
-public enum BasicPieces {
+public enum PieceType {
     ROOK,PAWN,BISHOP,QUEEN,KING,KNIGHT
 }

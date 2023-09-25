@@ -14,7 +14,8 @@ public static class PieceLibrary
         Piece piece = pieceGameObject.GetComponent<Piece>();
         piece.value = 3;
         
-        SetPieceSprite(pieceGameObject, "pawn_w");
+        //SetPieceSprite(pieceGameObject, "pawn_w");
+        SetPieceData(pieceGameObject, PieceType.PAWN);
 
         piece.movementPattern = new MovementPattern();
         Movement baseMovement = new Movement();
@@ -46,8 +47,10 @@ public static class PieceLibrary
         GameObject pieceGameObject = BoardManager.Instantiate(piecePrefab);
         Piece piece = pieceGameObject.GetComponent<Piece>();
         piece.value = 15;
-        SetPieceSprite(pieceGameObject, "rook_w");
-        
+        //SetPieceSprite(pieceGameObject, "rook_w");
+        Debug.Log(PieceType.ROOK.ToString());
+        SetPieceData(pieceGameObject, PieceType.ROOK);
+
         piece.movementPattern = new MovementPattern();
         
         Movement newMovement = new Movement();
@@ -83,7 +86,8 @@ public static class PieceLibrary
         GameObject pieceGameObject = BoardManager.Instantiate(piecePrefab);
         Piece piece = pieceGameObject.GetComponent<Piece>();
         piece.value = 10;
-        SetPieceSprite(pieceGameObject, "knight_w");
+        //SetPieceSprite(pieceGameObject, "knight_w");
+        SetPieceData(pieceGameObject, PieceType.KNIGHT);
         
         piece.movementPattern = new MovementPattern();
         
@@ -106,9 +110,10 @@ public static class PieceLibrary
        GameObject pieceGameObject = BoardManager.Instantiate(piecePrefab);
        Piece piece = pieceGameObject.GetComponent<Piece>();
        piece.value = 9;
-       SetPieceSprite(pieceGameObject, "bishop_w");
-        
-       piece.movementPattern = new MovementPattern();
+        //SetPieceSprite(pieceGameObject, "bishop_w");
+        SetPieceData(pieceGameObject, PieceType.BISHOP);
+
+        piece.movementPattern = new MovementPattern();
         
        Movement diagonalMovement = new Movement();
 
@@ -142,8 +147,9 @@ public static class PieceLibrary
         GameObject pieceGameObject = BoardManager.Instantiate(piecePrefab);
         Piece piece = pieceGameObject.GetComponent<Piece>();
         piece.value = 10000;
-        SetPieceSprite(pieceGameObject, "king_w");
-        
+        //SetPieceSprite(pieceGameObject, "king_w");
+        SetPieceData(pieceGameObject, PieceType.KING);
+
         piece.movementPattern = new MovementPattern();
         
         Movement newMovement = new Movement();
@@ -167,8 +173,9 @@ public static class PieceLibrary
         GameObject pieceGameObject = BoardManager.Instantiate(piecePrefab);
         Piece piece = pieceGameObject.GetComponent<Piece>();
         piece.value = 27;
-        SetPieceSprite(pieceGameObject, "queen_w");
-        
+        //SetPieceSprite(pieceGameObject, "queen_w");
+        SetPieceData(pieceGameObject, PieceType.QUEEN);
+
         piece.movementPattern = new MovementPattern();
         
 
@@ -216,20 +223,50 @@ public static class PieceLibrary
         
         return piece;
     }
-    private static void SetPieceSprite(GameObject pieceGameObject, string spriteName) {
-        Image sprite;
-        sprite = pieceGameObject.GetComponent<Image>();
-        if (sprite != null) {
-            Sprite loadedSprite = Resources.Load<Sprite>("Sprites/Pieces/"+spriteName);
-            if (loadedSprite != null) {
-                sprite.sprite = loadedSprite;
+    private static void SetPieceData(GameObject pieceGameObject, PieceType pieceType)
+    {
+        Piece piece = pieceGameObject.GetComponent<Piece>();
+        Image image = pieceGameObject.GetComponent<Image>();
+        if (piece != null)
+        {
+            PieceData data = Resources.Load<PieceData>("Data/Pieces/" + pieceType.ToString());
+            Debug.Log(data.move_Clip.ToString());
+            if (data != null)
+            {
+                piece.SetData(ref data);
+                if (piece.GetData().base_sprite != null)
+                {
+                    image.sprite = piece.GetData().base_sprite;
+                }
+                else
+                {
+                    Debug.LogError("No se pudo cargar el sprite.");
+                }
             }
-            else {
-                Debug.LogError("No se pudo cargar el sprite.");
+            else
+            {
+                Debug.LogError("No se pudo cargar los datos.");
             }
         }
-        else {
-            Debug.LogError("No se encontró el componente Image.");
+        else
+        {
+            Debug.LogError("No se encontró el componente Piece.");
         }
     }
+    //private static void SetPieceSprite(GameObject pieceGameObject, string spriteName) {
+    //    Image sprite;
+    //    sprite = pieceGameObject.GetComponent<Image>();
+    //    if (sprite != null) {
+    //        Sprite loadedSprite = Resources.Load<Sprite>("Sprites/Pieces/" + spriteName);
+    //        if (loadedSprite != null) {
+    //            sprite.sprite = loadedSprite;
+    //        }
+    //        else {
+    //            Debug.LogError("No se pudo cargar el sprite.");
+    //        }
+    //    }
+    //    else {
+    //        Debug.LogError("No se encontró el componente Image.");
+    //    }
+    //}
 }
