@@ -66,4 +66,6 @@ public class ManagerEffects : MonoBehaviour
         }
         StopCoroutine(Squash(transform, false, 0 , 0));
     }
+
+
 }

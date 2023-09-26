@@ -235,6 +235,7 @@ public static class PieceLibrary
                 if (piece.GetData().base_sprite != null)
                 {
                     image.sprite = piece.GetData().base_sprite;
+                    ManagerGame.Instance?.InstantiateMask(piece);
                 }
                 else
                 {

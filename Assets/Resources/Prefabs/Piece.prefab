@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 5250399453085150061}
   - component: {fileID: 4610187961206086962}
   - component: {fileID: 2238651295058206674}
+  - component: {fileID: -2390432657276605366}
   m_Layer: 5
   m_Name: Piece
   m_TagString: Untagged
@@ -201,7 +202,7 @@ MonoBehaviour:
   m_Color: {r: 0, g: 0, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -235,6 +236,19 @@ MonoBehaviour:
   amountOfLivesLeft: 1
   value: 3
   owner: 0
+--- !u!114 &-2390432657276605366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7337357392656743430}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &8036044461645136428
 GameObject:
   m_ObjectHideFlags: 0
