@@ -25,11 +25,11 @@ public class ManagerMusic : MonoBehaviour
         helper = GetComponentInChildren<AudioSource>();
         musicDistortionFilter = GetComponent<AudioDistortionFilter>();
     }
-    private void Start()
-    {
-        mixer.GetFloat("MusicVol", out musicDefault);
-        mixer.GetFloat("SFXVol", out sfxDefault);
-    }
+    //private void Start()
+    //{
+    //    mixer.GetFloat("MusicVol", out musicDefault);
+    //    mixer.GetFloat("SFXVol", out sfxDefault);
+    //}
 
     public void PlayMusic(AudioClip clip)
     {

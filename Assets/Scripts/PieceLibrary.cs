@@ -48,7 +48,6 @@ public static class PieceLibrary
         Piece piece = pieceGameObject.GetComponent<Piece>();
         piece.value = 15;
         //SetPieceSprite(pieceGameObject, "rook_w");
-        Debug.Log(PieceType.ROOK.ToString());
         SetPieceData(pieceGameObject, PieceType.ROOK);
 
         piece.movementPattern = new MovementPattern();
@@ -230,7 +229,6 @@ public static class PieceLibrary
         if (piece != null)
         {
             PieceData data = Resources.Load<PieceData>("Data/Pieces/" + pieceType.ToString());
-            Debug.Log(data.move_Clip.ToString());
             if (data != null)
             {
                 piece.SetData(ref data);

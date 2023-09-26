@@ -17,13 +17,6 @@ public class Piece : MonoBehaviour
     public int amountOfLivesLeft = 1;
     public int value = 3;
 
-    //Sound
-    //private AudioSource _audioSource;
-
-    //public AudioClip captureClip;
-    //public AudioClip getCapturedClip;
-    //public AudioClip moveClip;
-
     private PieceData pieceData;
 
     //public int priority = 0;
@@ -32,21 +25,15 @@ public class Piece : MonoBehaviour
  
     void Start()
     {
-        Debug.Log(pieceData.move_Clip.ToString());
-
         kingMarker = transform.Find("KingMarker").gameObject;
-        //_audioSource = GetComponent<AudioSource>();
+        //ManagerEffects.Instance?.SquashPiece(transform, true, 0.1f, 2);
     }
     public void SetData(ref PieceData data) 
     {
-        Debug.Log(data.move_Clip.ToString());
-
         pieceData = data;
-        Debug.Log(pieceData.move_Clip.ToString());
     }
-    public PieceData GetData() { 
-        
-        Debug.Log(pieceData.move_Clip.ToString());
+    public PieceData GetData() 
+    { 
         return pieceData; 
     } 
     public void SetOwner(int ownerID,PlayerData ownerData)
@@ -104,6 +91,7 @@ public class Piece : MonoBehaviour
     }
     public void Move(Tile targetTile) {
         //kingMarker.SetActive(king);
+        ManagerEffects.Instance?.MovePiece(transform, targetTile);
         ManagerEffects.Instance?.PlaySound(pieceData.move_Clip);
         //_audioSource.PlayOneShot(moveClip);
     }

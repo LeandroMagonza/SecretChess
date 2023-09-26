@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -5,15 +6,12 @@ public class ManagerEffects : MonoBehaviour
 {
     public static ManagerEffects Instance;
 
-    private ParticleSystem _particleSystem;
     private AudioSource _audioSource;
-    private Camera _camera;
+
     private void Awake()
     {
         Instance = this;
         _audioSource = GetComponent<AudioSource>();
-        _particleSystem = GetComponent<ParticleSystem>();
-        _camera = Camera.main;
     }
     
     public void PlayEffect(GameObject particle, AudioClip clip)
@@ -24,7 +22,6 @@ public class ManagerEffects : MonoBehaviour
     public void PlayEffectIn(GameObject particle, AudioClip clip, Vector3 position)
     {
         transform.position = position;
-        Debug.Log(position);
         PlayEffect(particle, clip);
 
     }
@@ -36,5 +33,37 @@ public class ManagerEffects : MonoBehaviour
     public void PlaySound(AudioClip clip)
     {
         _audioSource.PlayOneShot(clip);
+    }
+
+    public void SquashPiece(Transform transform, bool value, float amount, float speed)
+    {
+        StartCoroutine(Squash(transform, value, amount, speed));
+    }
+    public void MovePiece(Transform transform, Tile tile)
+    {
+        StartCoroutine(Move(transform, tile));
+    }
+
+    private IEnumerator Move(Transform transform, Tile tile)
+    {
+        while(Vector3.Distance(transform.localPosition, tile.gameObject.transform.localPosition) > 0.1f)
+        {
+            transform.localPosition = Vector3.MoveTowards(transform.localPosition, tile.gameObject.transform.localPosition, 0.1f);
+            yield return new WaitForSeconds(0.1f);
+        }
+        StopCoroutine(Move(transform, tile));
+    }
+
+
+    private IEnumerator Squash(Transform transform, bool value, float amount, float speed)
+    {
+        Vector3 initialScale = transform.localScale;
+        while (value)
+        {
+            float scale = 1.0f + Mathf.Sin(Time.time * speed) * amount;
+            transform.localScale = new Vector3(initialScale.x * scale, initialScale.y / scale, initialScale.z);
+            yield return new WaitForSeconds(0.01f);
+        }
+        StopCoroutine(Squash(transform, false, 0 , 0));
     }
 }
