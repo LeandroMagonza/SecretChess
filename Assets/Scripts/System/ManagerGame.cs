@@ -18,6 +18,7 @@ public class ManagerGame : MonoBehaviour
             GameObject mask = Instantiate(maskPrefab, piece.transform);
             Image image = mask.GetComponent<Image>();
             image.sprite = sprite;
+            image.preserveAspect = true;
         }
     }
 }
