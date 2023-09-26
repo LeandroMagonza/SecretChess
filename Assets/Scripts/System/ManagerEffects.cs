@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ManagerEffects : MonoBehaviour
 {
@@ -6,31 +7,30 @@ public class ManagerEffects : MonoBehaviour
 
     private ParticleSystem _particleSystem;
     private AudioSource _audioSource;
+    private Camera _camera;
     private void Awake()
     {
         Instance = this;
         _audioSource = GetComponent<AudioSource>();
         _particleSystem = GetComponent<ParticleSystem>();
+        _camera = Camera.main;
     }
     
     public void PlayEffect(GameObject particle, AudioClip clip)
     {
-        _audioSource.PlayOneShot(clip);
-        _particleSystem = particle.GetComponent<ParticleSystem>();
-        _particleSystem.Play();
+        PlayParticle(particle);
+        PlaySound(clip);
     }
     public void PlayEffectIn(GameObject particle, AudioClip clip, Vector3 position)
     {
         transform.position = position;
-        _audioSource.PlayOneShot(clip);
-        _particleSystem = particle.GetComponent<ParticleSystem>();
-        ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
-        _particleSystem.Play();
+        Debug.Log(position);
+        PlayEffect(particle, clip);
+
     }
     public void PlayParticle(GameObject particle)
     {
-        _particleSystem = particle.GetComponent<ParticleSystem>();
-        _particleSystem.Play();
+        Instantiate(particle, transform.position, Quaternion.identity);
     }
 
     public void PlaySound(AudioClip clip)

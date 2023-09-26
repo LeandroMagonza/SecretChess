@@ -91,6 +91,7 @@ public class Piece : MonoBehaviour
     public void Capture(Piece capturedPiece) {
         //kingMarker.SetActive(king);
         //_audioSource.PlayOneShot(captureClip);
+        CameraShake.Shake(0.1f, 0.1f);
         ManagerEffects.Instance.PlaySound(pieceData.capture_Clip);
 
     }
@@ -98,6 +99,7 @@ public class Piece : MonoBehaviour
         //kingMarker.SetActive(king);
         //_audioSource.PlayOneShot(getCapturedClip);
         ManagerEffects.Instance.PlayEffectIn(pieceData.die_ParticleEffect, pieceData.die_Clip, transform.position);
+        CameraShake.Shake(0.1f, 0.2f);
         PlayerController.Instance.players[GetOwnerID()].RemovePiece(this);
     }
     public void Move(Tile targetTile) {

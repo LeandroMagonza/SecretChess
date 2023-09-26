@@ -17,4 +17,4 @@ MonoBehaviour:
   capture_Clip: {fileID: 8300000, guid: 0a225da261601ce459f11a99b26fe765, type: 3}
   move_Clip: {fileID: 8300000, guid: 0a225da261601ce459f11a99b26fe765, type: 3}
   die_Clip: {fileID: 8300000, guid: 8a68a05dc83b55f428bfc32b60a117ff, type: 3}
-  die_ParticleEffect: {fileID: 2600134310280567883, guid: 4f40fc272bff80040a56fe75f182c101, type: 3}
+  die_ParticleEffect: {fileID: 1794869083528504, guid: abc73d3beeae237469014a13caeae53a, type: 3}
