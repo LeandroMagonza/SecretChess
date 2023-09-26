@@ -18,6 +18,7 @@ public class Piece : MonoBehaviour
     public int value = 3;
 
     private PieceData pieceData;
+    private Image renderImage;
 
     //public int priority = 0;
     [SerializeField]
@@ -31,6 +32,16 @@ public class Piece : MonoBehaviour
     public void SetData(ref PieceData data) 
     {
         pieceData = data;
+        renderImage = GetComponent<Image>();
+        if (pieceData.base_sprite != null)
+        {
+            renderImage.sprite = pieceData.base_sprite;
+            ManagerGame.Instance?.InstantiateMask(this);
+        }
+        else
+        {
+            Debug.LogError("No se pudo cargar el sprite.");
+        }
     }
     public PieceData GetData() 
     { 

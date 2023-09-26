@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 public static class PieceLibrary
 {
     public static GameObject piecePrefab;
@@ -225,22 +222,12 @@ public static class PieceLibrary
     private static void SetPieceData(GameObject pieceGameObject, PieceType pieceType)
     {
         Piece piece = pieceGameObject.GetComponent<Piece>();
-        Image image = pieceGameObject.GetComponent<Image>();
         if (piece != null)
         {
             PieceData data = Resources.Load<PieceData>("Data/Pieces/" + pieceType.ToString());
             if (data != null)
             {
                 piece.SetData(ref data);
-                if (piece.GetData().base_sprite != null)
-                {
-                    image.sprite = piece.GetData().base_sprite;
-                    ManagerGame.Instance?.InstantiateMask(piece);
-                }
-                else
-                {
-                    Debug.LogError("No se pudo cargar el sprite.");
-                }
             }
             else
             {
@@ -252,20 +239,4 @@ public static class PieceLibrary
             Debug.LogError("No se encontró el componente Piece.");
         }
     }
-    //private static void SetPieceSprite(GameObject pieceGameObject, string spriteName) {
-    //    Image sprite;
-    //    sprite = pieceGameObject.GetComponent<Image>();
-    //    if (sprite != null) {
-    //        Sprite loadedSprite = Resources.Load<Sprite>("Sprites/Pieces/" + spriteName);
-    //        if (loadedSprite != null) {
-    //            sprite.sprite = loadedSprite;
-    //        }
-    //        else {
-    //            Debug.LogError("No se pudo cargar el sprite.");
-    //        }
-    //    }
-    //    else {
-    //        Debug.LogError("No se encontró el componente Image.");
-    //    }
-    //}
 }
