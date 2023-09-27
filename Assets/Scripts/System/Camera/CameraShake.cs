@@ -17,7 +17,8 @@ public class CameraShake : MonoBehaviour
     }
     private void StartShake(float duration, float magnitude)
     {
-        StartCoroutine(CamShake(duration, magnitude));
+        if (Options.shake)
+            StartCoroutine(CamShake(duration, magnitude));
     }
     public IEnumerator CamShake(float duration, float magnitude)
     {

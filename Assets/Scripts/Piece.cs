@@ -27,7 +27,7 @@ public class Piece : MonoBehaviour
     void Start()
     {
         kingMarker = transform.Find("KingMarker").gameObject;
-        //ManagerEffects.Instance?.SquashPiece(transform, true, 0.1f, 2);
+        //ManagerEffects.Instance?.SquashPiece(transform, true, 0.1f, 20);
     }
     public void SetData(ref PieceData data) 
     {
@@ -89,7 +89,7 @@ public class Piece : MonoBehaviour
     public void Capture(Piece capturedPiece) {
         //kingMarker.SetActive(king);
         //_audioSource.PlayOneShot(captureClip);
-        CameraShake.Shake(0.1f, 0.1f);
+        //CameraShake.Shake(0.1f, 0.1f);
         ManagerEffects.Instance.PlaySound(pieceData.capture_Clip);
 
     }
@@ -102,7 +102,6 @@ public class Piece : MonoBehaviour
     }
     public void Move(Tile targetTile) {
         //kingMarker.SetActive(king);
-        ManagerEffects.Instance?.MovePiece(transform, targetTile);
         ManagerEffects.Instance?.PlaySound(pieceData.move_Clip);
         //_audioSource.PlayOneShot(moveClip);
     }

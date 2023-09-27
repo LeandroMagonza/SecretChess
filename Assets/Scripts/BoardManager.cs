@@ -341,10 +341,10 @@ public class BoardManager : MonoBehaviour {
 
 
         tileStart.SetPiece(null);
-        movingPiece.Move(tileEnd);
         Piece capturedPiece = tileEnd.piece;
         movingPiece.amountOfMoves++;
         tileEnd.SetPiece(movingPiece);
+        movingPiece.Move(tileEnd);
 
         if (capturedPiece) {
             movingPiece.Capture(capturedPiece);

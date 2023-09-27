@@ -1,12 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ManagerGame : MonoBehaviour
 {
     public static ManagerGame Instance;
     public GameObject maskPrefab;
+    private bool options;
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            options = !options;
+            if (options)
+            {
+                SceneManager.LoadSceneAsync("Options", LoadSceneMode.Additive);
+            }
+            else
+            {
+                SceneManager.UnloadSceneAsync("Options");
+            }
+        }
+    }
     private void Awake()
     {
         Instance = this;
