@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class Options : MonoBehaviour
@@ -14,6 +16,7 @@ public class Options : MonoBehaviour
     public Toggle advancedUI;
     public Toggle lerpUI;
     public Toggle shakeUI;
+    public Toggle squashUI;
 
     private static Slider musicUISlider;
     private static Slider soundUISlider;
@@ -26,6 +29,7 @@ public class Options : MonoBehaviour
     private static Toggle advancedUIToggle;
     private static Toggle lerpUIToggle;
     private static Toggle shakeUIToggle;
+    private static Toggle squashUIToggle;
 
     public static bool cinematics = true;
     public static bool particles = true;
@@ -34,11 +38,24 @@ public class Options : MonoBehaviour
     public static bool music = true;
     public static bool sound = true;
     public static bool shake = true;
+    public static bool squash = true;
 
     private static float musicVolume = 1;
     private static float sfxVolume = 1;
 
     private void OnEnable()
+    {
+        Validate();
+        Initialization();
+    }
+
+    private void Initialization()
+    {
+        soundUISlider.value = sfxVolume;
+        musicUISlider.value = musicVolume;
+    }
+
+    private void Validate()
     {
         soundUISlider = soundUI.GetComponent<Slider>();
         musicUISlider = musicUI.GetComponent<Slider>();
@@ -50,11 +67,10 @@ public class Options : MonoBehaviour
         advancedUIToggle = advancedUI.GetComponent<Toggle>();
         lerpUIToggle = lerpUI.GetComponent<Toggle>();
         shakeUIToggle = shakeUI.GetComponent<Toggle>();
+        squashUIToggle = squashUI.GetComponent<Toggle>();
 
         ManagerMusic.instance?.SetMusicVolume(musicVolume);
         ManagerMusic.instance?.SetFxVolume(sfxVolume);
-
-        Debug.Log(musicVolume);
     }
 
     public static void SetMusicMute()
@@ -127,5 +143,10 @@ public class Options : MonoBehaviour
     public static void SetShake()
     {
         shake = shakeUIToggle.isOn;
+    }
+
+    public static void SetSquash()
+    {
+        squash = squashUIToggle.isOn;
     }
 }

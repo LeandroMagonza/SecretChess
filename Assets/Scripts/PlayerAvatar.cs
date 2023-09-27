@@ -25,6 +25,19 @@ public class PlayerAvatar : MonoBehaviour
         }
     }
 
+    public Sprite Load(string resourcePath, string spriteName)
+    {
+        Sprite[] all = Resources.LoadAll<Sprite>(resourcePath);
+
+        foreach (var s in all)
+        {
+            if (s.name == spriteName)
+            {
+                return s;
+            }
+        }
+        return null;
+    }
     public void DisplayInitiative(int initiative) {
         if (initiative == 0) {
             initiativeMarker.gameObject.SetActive(true);

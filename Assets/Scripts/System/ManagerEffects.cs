@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class ManagerEffects : MonoBehaviour
 {
@@ -27,7 +26,8 @@ public class ManagerEffects : MonoBehaviour
     }
     public void PlayParticle(GameObject particle)
     {
-        Instantiate(particle, transform.position, Quaternion.identity);
+        if(Options.particles)
+            Instantiate(particle, transform.position, Quaternion.identity);
     }
 
     public void PlaySound(AudioClip clip)
@@ -37,11 +37,13 @@ public class ManagerEffects : MonoBehaviour
 
     public void SquashPiece(Transform transform, bool value, float amount, float speed)
     {
-        StartCoroutine(Squash(transform, value, amount, speed));
+        if (Options.squash)
+            StartCoroutine(Squash(transform, value, amount, speed));
     }
     public void MovePiece(Transform transform, Tile tile)
     {
-        StartCoroutine(Move(transform, tile));
+        if (Options.lerp)
+            StartCoroutine(Move(transform, tile));
     }
 
     private IEnumerator Move(Transform transform, Tile tile)
