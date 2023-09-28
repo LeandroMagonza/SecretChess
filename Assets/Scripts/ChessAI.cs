@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
+//original:  https://github.com/Peter-Lavigne/Chess/tree/master/Assets/Scripts
+
 // keeps track of game logic and chess rules
 public class ChessAI : MonoBehaviour {
     private static ChessAI instance;

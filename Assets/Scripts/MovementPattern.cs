@@ -29,10 +29,13 @@ public class MovementPattern {
         List<Move> moves = new List<Move>();
         foreach (var movement in movements) {
             //modify get possible moves so it also works with ai, might have to copy it and change stuff
+            //hay que cambiar esta logica poara que en vez de fijarse en el tablero que esta en el board manager, se fije en el testing board de chess ai
+            //
+            //BoardManager.Instance.FindTileOccupiedByPieceInBoard(movingPiece)
             
-            // foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
-            //     moves.Add(new Move(startingTileNumber, endTileAndMarkingData.endTile.tileNumber,endTileAndMarkingData.endTile.piece));
-            // }
+            foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
+                moves.Add(new Move(startingTileNumber, endTileAndMarkingData.endTile.tileNumber,endTileAndMarkingData.endTile.piece));
+            }
         }
         return moves;
     }
