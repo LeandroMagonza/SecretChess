@@ -29,9 +29,10 @@ public class MovementPattern {
         List<Move> moves = new List<Move>();
         foreach (var movement in movements) {
             //modify get possible moves so it also works with ai, might have to copy it and change stuff
-            foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
-                moves.Add(new Move(startingTileNumber, endTileAndMarkingData.endTile.tileNumber,endTileAndMarkingData.endTile.piece));
-            }
+            
+            // foreach (var endTileAndMarkingData in movement.GetPossibleMoves(tile, invert)) {
+            //     moves.Add(new Move(startingTileNumber, endTileAndMarkingData.endTile.tileNumber,endTileAndMarkingData.endTile.piece));
+            // }
         }
         return moves;
     }
