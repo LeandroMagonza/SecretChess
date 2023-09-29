@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour {
             tile.piece.GetOwnerID() == Instance.currentPlayer) {
             //selectedPiece = tile.piece;
             //BoardManager.Instance
-            ManagerEffects.Instance?.SquashPiece(tile.piece.transform, true, 0.1f, 10);
+            
             BoardManager.Instance.SetSelectedTile(tile);
         }
     }
@@ -66,7 +66,7 @@ public class PlayerController : MonoBehaviour {
         foreach (var playerData in players) {
             playerData.DisplayTurn(false);
         }
-        ManagerEffects.Instance?.StopSquash();
+
         yield return StartCoroutine(BoardManager.Instance.ProcessMove(tile));
         currentPlayer = 1 - currentPlayer;
         //a cada avatar de jugador le pasa el id del jugador actual,si coincide con el propio hace una animacion 

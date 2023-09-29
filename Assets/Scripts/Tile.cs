@@ -49,6 +49,7 @@ public class Tile : MonoBehaviour
     public void MarkAsSelected(bool selected)
     {
         if (selected) {
+            ManagerEffects.Instance?.SquashPiece(piece.transform, true, 0.1f, 10);
             Color32 previousColor = GetComponent<Image>().color;
             GetComponent<Image>().color = new Color32(
                 255,
@@ -57,6 +58,7 @@ public class Tile : MonoBehaviour
                 255);
         }
         else {
+            ManagerEffects.Instance?.StopSquash();
             GetComponent<Image>().color = new Color32(
                 originalColor.r,
                 originalColor.g,
