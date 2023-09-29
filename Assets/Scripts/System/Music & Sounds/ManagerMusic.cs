@@ -4,12 +4,11 @@ using UnityEngine.Audio;
 public class ManagerMusic : MonoBehaviour
 {
     public static ManagerMusic instance;
+
     public AudioMixer mixer;
     private AudioSource musicSource;
     private AudioDistortionFilter musicDistortionFilter;
-    private AudioSource helper;
-    private float musicDefault;
-    private float sfxDefault;
+
     private void Awake()
     {
         if (instance == null)
@@ -22,28 +21,20 @@ public class ManagerMusic : MonoBehaviour
             Destroy(gameObject);
         }
         musicSource = GetComponent<AudioSource>();
-        helper = GetComponentInChildren<AudioSource>();
         musicDistortionFilter = GetComponent<AudioDistortionFilter>();
     }
-    //private void Start()
-    //{
-    //    mixer.GetFloat("MusicVol", out musicDefault);
-    //    mixer.GetFloat("SFXVol", out sfxDefault);
-    //}
+    private void Start()
+    {
+        mixer.GetFloat("MusicVol", out Options.Options_Sounds.musicVolume);
+        mixer.GetFloat("SFXVol", out Options.Options_Sounds.soundVolume);
+    }
 
     public void PlayMusic(AudioClip clip)
     {
         musicSource.clip = clip;
         musicSource.Play();
     }
-    public void PlayInHelper(AudioClip clip)
-    {
-        helper.PlayOneShot(clip);
-    }
-    public void StopHelper()
-    {
-        helper?.Stop();
-    }
+
     public void StopMusic()
     {
         musicSource?.Stop();

@@ -19,6 +19,7 @@ public class Piece : MonoBehaviour
 
     private PieceData pieceData;
     private Image renderImage;
+    private Canvas canvas;
 
     //public int priority = 0;
     [SerializeField]
@@ -26,6 +27,8 @@ public class Piece : MonoBehaviour
  
     void Start()
     {
+        canvas = GetComponent<Canvas>();
+        canvas.worldCamera = Camera.main;
         kingMarker = transform.Find("KingMarker").gameObject;
         //ManagerEffects.Instance?.SquashPiece(transform, true, 0.1f, 20);
     }

@@ -262,12 +262,16 @@ public class BoardManager : MonoBehaviour {
             foreach (var queue in queues) {
                 foreach (var move in queue) {
                     yield return new WaitForSeconds(.5f);
+                    //ManagerEffects.Instance?.MovePiece(move.Value.movingPiece.transform, move.Value.endingTile);
+                    //yield return new WaitWhile(ManagerEffects.Instance?.GetFinishMove());
                     if (move.Value.moveData.movement is null) {
                         throw new Exception("move.Value.moveData. movement is null");
                     } if (move.Value.moveData.movement.movementStencil is null) {
                         throw new Exception("move.Value.moveData. movement. movementstencil is null");
                     }
+                    yield return StartCoroutine(ManagerEffects.Instance.Move(move.Value.movingPiece.transform, move.Value.endingTile));
                     ExecuteMove(move.Value.movingPiece,move.Value.endingTile,move.Value.moveData);    
+
                 }
             }
             // al jugador con mas iniciativa se le asigna la iniciativa mas baja (0) para que la proxima ronda vaya primero
@@ -287,8 +291,8 @@ public class BoardManager : MonoBehaviour {
         //Debug.Log("Exiting checkmovequeue");
     }
 
-    public void ExecuteMove(Piece movingPiece, Tile tileEnd,
-        (Movement movement, int layer, (int row, int column) offset) intendedMovementEnd) {
+    public void ExecuteMove(Piece movingPiece, Tile tileEnd, (Movement movement, int layer, (int row, int column) offset) intendedMovementEnd) 
+    {
         //chequea si la pieza fue comida antes de su turno
         //if (movingPiece is null) return;
         if (movingPiece == null) return;
@@ -339,8 +343,11 @@ public class BoardManager : MonoBehaviour {
             }
         }
 
-
         tileStart.SetPiece(null);
+
+        //ManagerEffects.Instance?.MovePiece(movingPiece.transform, tileEnd);
+
+
         Piece capturedPiece = tileEnd.piece;
         movingPiece.amountOfMoves++;
         tileEnd.SetPiece(movingPiece);
@@ -361,7 +368,6 @@ public class BoardManager : MonoBehaviour {
                 matchEndText.text = "RED WON";
                 StartCoroutine(RestartMatch());
             }
-
             Destroy(capturedPiece.gameObject);
         }
     }

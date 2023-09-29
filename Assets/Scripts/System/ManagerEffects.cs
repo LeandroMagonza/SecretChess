@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -6,6 +7,9 @@ public class ManagerEffects : MonoBehaviour
     public static ManagerEffects Instance;
 
     private AudioSource _audioSource;
+    private IEnumerator squash;
+    public bool finishMove = false;
+
 
     private void Awake()
     {
@@ -22,11 +26,10 @@ public class ManagerEffects : MonoBehaviour
     {
         transform.position = position;
         PlayEffect(particle, clip);
-
     }
     public void PlayParticle(GameObject particle)
     {
-        if(Options.particles)
+        if(Options.Options_Graphics.particles)
             Instantiate(particle, transform.position, Quaternion.identity);
     }
 
@@ -37,25 +40,37 @@ public class ManagerEffects : MonoBehaviour
 
     public void SquashPiece(Transform transform, bool value, float amount, float speed)
     {
-        if (Options.squash)
-            StartCoroutine(Squash(transform, value, amount, speed));
+        if (Options.Options_Graphics.squash)
+        {
+            this.squash = Squash(transform, value, amount, speed);
+            StartCoroutine(this.squash);
+        }
+    }
+    public void StopSquash()
+    {
+        if (this.squash != null)
+            StopCoroutine(this.squash);
     }
     public void MovePiece(Transform transform, Tile tile)
     {
-        if (Options.lerp)
+        if (Options.Options_Graphics.lerp)
             StartCoroutine(Move(transform, tile));
     }
 
-    private IEnumerator Move(Transform transform, Tile tile)
+    public IEnumerator Move(Transform transform, Tile tile)
     {
-        while(Vector3.Distance(transform.localPosition, tile.gameObject.transform.localPosition) > 0.1f)
+        float time = 0;
+        while (Vector3.Distance(transform.position, tile.gameObject.transform.position) > 0.02f)
         {
-            transform.localPosition = Vector3.MoveTowards(transform.localPosition, tile.gameObject.transform.localPosition, 0.1f);
-            yield return new WaitForSeconds(0.1f);
+            finishMove = false;
+            time += Time.deltaTime;
+            transform.position = Vector3.Lerp(transform.position, tile.gameObject.transform.position, time);
+            yield return new WaitForSeconds(0.01f);
         }
+        finishMove = true;
+        transform.position = tile.transform.position;
         StopCoroutine(Move(transform, tile));
     }
-
 
     private IEnumerator Squash(Transform transform, bool value, float amount, float speed)
     {
@@ -66,7 +81,7 @@ public class ManagerEffects : MonoBehaviour
             transform.localScale = new Vector3(initialScale.x * scale, initialScale.y / scale, initialScale.z);
             yield return new WaitForSeconds(0.01f);
         }
-        StopCoroutine(Squash(transform, false, 0 , 0));
+        
     }
 
 

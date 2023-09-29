@@ -25,7 +25,8 @@ public class Tile : MonoBehaviour
         // if (tileNumber == null)
         // {
         this.piece = piece;
-        if (piece is not null) {
+        if (piece is not null)
+        {
             piece.transform.SetParent(this.transform);
             piece.transform.position = this.transform.position;
             piece.transform.SetAsFirstSibling();
