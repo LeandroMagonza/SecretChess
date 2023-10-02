@@ -94,14 +94,31 @@ public class Piece : MonoBehaviour
         //_audioSource.PlayOneShot(captureClip);
         //CameraShake.Shake(0.1f, 0.1f);
         ManagerEffects.Instance.PlaySound(pieceData.capture_Clip);
+        StartCoroutine(ExecuteCapture(capturedPiece));
 
     }
     public void GetCaptured(Piece capturerPiece) {
         //kingMarker.SetActive(king);
         //_audioSource.PlayOneShot(getCapturedClip);
+        PlayerController.Instance.players[GetOwnerID()].RemovePiece(this);
+
+    }
+    public IEnumerator ExecuteCinematic(Piece capturedPiece)
+    {
+        Debug.Log("start Cinematic");
+        yield return new WaitForSeconds(1);
+        Debug.Log("finish cinematic");
+
+    }
+    public IEnumerator ExecuteCapture(Piece capturedPiece)
+    {
+        Debug.Log("Start Capture"); 
+        yield return StartCoroutine(ExecuteCinematic(capturedPiece));
+        
         ManagerEffects.Instance.PlayEffectIn(pieceData.die_ParticleEffect, pieceData.die_Clip, transform.position);
         CameraShake.Shake(0.1f, 0.2f);
-        PlayerController.Instance.players[GetOwnerID()].RemovePiece(this);
+
+        Debug.Log("Finish Capture");
     }
     public void Move(Tile targetTile) {
         //kingMarker.SetActive(king);
