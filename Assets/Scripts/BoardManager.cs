@@ -21,15 +21,16 @@ public class BoardManager : MonoBehaviour {
     public delegate void TileSelected(bool selected);
 
     public static event TileSelected OnTileSelected;
-    private Tile[,] board = new Tile[8, 8];
+    public Tile[,] board = new Tile[8, 8];
     private Row[] boardInRows = new Row[8];
     private Tile currentlySelectedTile;
-    private static BoardManager instance;
     public TextMeshProUGUI matchEndText;
 
     public int turnNumber = 1;
     private bool processingMoves = false;
 
+    #region Singleton
+    private static BoardManager instance;
     public static BoardManager Instance {
         get {
             if (instance == null)
@@ -54,6 +55,7 @@ public class BoardManager : MonoBehaviour {
             DestroyImmediate(this);
     }
 
+    #endregion
     void Start() {
         for (int row = 0; row < 8; row++) {
             //instantiate row and place row inside of board
@@ -192,7 +194,7 @@ public class BoardManager : MonoBehaviour {
         return board[row, column];
     }
 
-    public IEnumerator ProcessMove(Tile endingTile) {
+    public IEnumerator ProcessMove(Tile endingTile, Piece movingPiece = null) {
         turnNumber++;
         Tile selectedTile = currentlySelectedTile;
         PlayerData actingPlayer = PlayerController.Instance.players[selectedTile.piece.GetOwnerID()];

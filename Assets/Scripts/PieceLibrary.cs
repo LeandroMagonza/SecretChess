@@ -36,6 +36,7 @@ public static class PieceLibrary
         piece.movementPattern.AddMovement(firstMovement);
         
         layer = firstMovement.AddLayer();
+        firstMovement.AddStep(layer,(1,0),new CellCondition(CellContent.Empty));
         firstMovement.AddStep(layer,(2,0),new CellCondition(CellContent.Move));
 
         return piece;

@@ -72,11 +72,15 @@ public class PlayerController : MonoBehaviour {
         players[currentPlayer].DisplayTurn(true);
 
         if (players[currentPlayer].playerType == PlayerType.IA) {
-            yield return StartCoroutine(ChooseMove(currentPlayer, players[currentPlayer]));
+            yield return StartCoroutine(ChooseMove(players[currentPlayer]));
         }
     }
 
-    public IEnumerator ChooseMove(int playerID, PlayerData playerData) {
+    public IEnumerator ChooseMove( PlayerData playerData) {
+        (Tile startingTile, Tile tileEnd) chosenMoveAI = ChessAI.Instance.ChooseMove(BoardManager.Instance.board,playerData);
+        BoardManager.Instance.SetSelectedTile(chosenMoveAI.startingTile);
+        yield return ProcessMove(chosenMoveAI.tileEnd);
+        /*
         bool possibleMoveFound = false;
         while (!possibleMoveFound) {
             Piece testingPiece = playerData.piecesOwnedByPlayer[Random.Range(0, playerData.piecesOwnedByPlayer.Count)];
@@ -95,6 +99,7 @@ public class PlayerController : MonoBehaviour {
 
             yield return null;
         }
+        */
     }
 
     public void ResetPlayer(int playerID) {
