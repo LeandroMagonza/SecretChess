@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -46,6 +47,14 @@ public class ChessAI : MonoBehaviour {
         int currentPlayerID = currentPlayerData.playerID;
         
         bool possibleMoveFound = false;
+        //PlayerController.Instance.players[1 - currentPlayerID];
+        
+        List<Piece> allPlayerPieces = new List<Piece>();
+        foreach (var VARIABLE in testingBoard) {
+            if(VARIABLE.GetOwnerID() == currentPlayerData.playerID) allPlayerPieces.Add(VARIABLE);
+        }
+        
+        
         while (!possibleMoveFound) {
             Piece testingPiece = currentPlayerData.piecesOwnedByPlayer[Random.Range(0, currentPlayerData.piecesOwnedByPlayer.Count)];
             Tile startingTile = BoardManager.Instance.FindTileOccupiedByPieceInBoard(testingPiece);
@@ -63,10 +72,7 @@ public class ChessAI : MonoBehaviour {
         }
         
         
-        
-        
-        
-        return (new Tile(), new Tile());
+        throw new Exception("no moves available");
     }
 
     private void SetupTestingBoard(Tile[,] instanceBoard) {
@@ -79,3 +85,12 @@ public class ChessAI : MonoBehaviour {
     }
 }
 
+/* tablero, jugador, profundidad, estrategia MIN|MAX, iniciativa
+ * si tiene la iniciativa, se evalua como ajedrez normal, exepto los reyes
+ * si no tiene iniciativa, se tiene que evaluar el turno del que tiene iniciativa primero, y en base a lo que hace
+ * evaluar la jugada sin iniciativa
+ * buscar todas las piezas del jugador
+ * por cada pieza
+ *  si profundidad es igual a 0, devolver la jugada que tenga el mayor valor, osea que coma la pieza de mayor valor
+ *  si no es igual a 0, llamar a esta misma funcion con profundidad -1
+ */
