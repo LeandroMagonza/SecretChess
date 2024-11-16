@@ -32,11 +32,13 @@ public class PlayerController : MonoBehaviour {
                     .SetPieceColor(Color.red)
                     .SetPlayerAvatar(playerAvatars[0])
             );
+            playerAvatars[0].UpdatePlayerTypeText(players[0].playerType);
             players.Add(
-                new PlayerData(PlayerType.IA, 1, 1)
+                new PlayerData(PlayerType.LOCAL_PLAYER, 1, 1)
                     .SetPieceColor(Color.blue)
                     .SetPlayerAvatar(playerAvatars[1])
             );
+            playerAvatars[1].UpdatePlayerTypeText(players[1].playerType);
             players[currentPlayer].DisplayTurn(true);
         }
         else if (instance != this)
@@ -104,6 +106,23 @@ public class PlayerController : MonoBehaviour {
             players[playerID].king = null;
             players[playerID].piecesOwnedByPlayer = new List<Piece>();
             players[playerID].SetInitiative(playerID);
+            players[playerID].playerAvatar.UpdatePlayerTypeText(players[playerID].playerType);
+        }
+    }
+
+    public void TogglePlayerType(int playerID)
+    {
+        if (playerID >= 0 && playerID < players.Count)
+        {
+            PlayerData playerData = players[playerID];
+            
+            // Toggle between IA and LOCAL_PLAYER
+            playerData.playerType = playerData.playerType == PlayerType.IA 
+                ? PlayerType.LOCAL_PLAYER 
+                : PlayerType.IA;
+
+            // Update the UI text
+            playerData.playerAvatar.UpdatePlayerTypeText(playerData.playerType);
         }
     }
 }
