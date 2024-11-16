@@ -11,6 +11,28 @@ public class PlayerAvatar : MonoBehaviour
     public int owner;
     public TextMeshProUGUI activePlayerText;
     public Image initiativeMarker;
+    public TextMeshProUGUI playerTypeText;
+    private Button button;
+
+    void Start()
+    {
+        button = GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.AddListener(OnAvatarClicked);
+        }
+    }
+
+    private void OnAvatarClicked()
+    {
+        PlayerController.Instance.TogglePlayerType(owner);
+    }
+
+    public void UpdatePlayerTypeText(PlayerType playerType)
+    {
+        playerTypeText.text = playerType.ToString();
+    }
+
     // Start is called before the first frame update
 
     public void DisplayTurn(bool active) {
